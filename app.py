@@ -3,16 +3,20 @@ import uuid
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from werkzeug.security import generate_password_hash, check_password_hash
-from pymongo import MongoClient
-from dotenv import load_dotenv
 
+# Carregar variáveis de ambiente
+from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-123")
+# Configuração explícita de caminhos para a Vercel
+template_dir = os.path.abspath('templates')
+static_dir = os.path.abspath('static')
 
-# --- BANCO DE DADOS ---
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-999")
+
+# --- BANCO DE DADOS MONGODB ---
+from pymongo import MongoClient
 MONGO_URI = os.environ.get("MONGO_URI")
 db = None
 DB_CONNECTED = False
@@ -30,34 +34,26 @@ if MONGO_URI:
 def inject_globals():
     return dict(db_status=DB_CONNECTED)
 
-# --- AUXILIARES ---
+# --- FUNÇÕES DE APOIO ---
 def get_users():
-    try:
-        return list(db.users.find()) if DB_CONNECTED else []
-    except:
-        return []
+    try: return list(db.users.find()) if DB_CONNECTED else []
+    except: return []
 
 def save_user(user_data):
     if DB_CONNECTED:
-        try:
-            db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
-        except:
-            pass
+        try: db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
+        except: pass
 
 def get_camps():
-    try:
-        return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
-    except:
-        return []
+    try: return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
+    except: return []
 
 def save_camp(camp_data):
     if DB_CONNECTED:
-        try:
-            db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
-        except:
-            pass
+        try: db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
+        except: pass
 
-# --- PROTEÇÃO ---
+# --- DECORADORES DE ACESSO ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -75,7 +71,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- ROTAS PÚBLICAS ---
+# --- ROTAS PRINCIPAIS ---
 @app.route("/")
 def index():
     all_camps = get_camps()
@@ -91,8 +87,7 @@ def cadastro():
             flash("E-mail é obrigatório.", "danger")
             return redirect(url_for("cadastro"))
         
-        users = get_users()
-        if any(u.get("email") == email for u in users):
+        if any(u.get("email") == email for u in get_users()):
             flash("E-mail já cadastrado.", "danger")
             return redirect(url_for("cadastro"))
 
@@ -108,15 +103,11 @@ def cadastro():
         
         if email == "jhonybrandoborges@gmail.com":
             new_user["role"] = "admin"
-        elif not users:
+        elif not get_users():
             new_user["role"] = "admin"
 
         save_user(new_user)
-        session.update({
-            "user_id": new_user["id"], 
-            "user_nome": new_user["nome"], 
-            "role": new_user["role"]
-        })
+        session.update({"user_id": new_user["id"], "user_nome": new_user["nome"], "role": new_user["role"]})
         return redirect(url_for("campeonatos"))
     return render_template("cadastro.html")
 
@@ -126,11 +117,7 @@ def login():
         email = request.form.get("email", "").lower().strip()
         user = next((u for u in get_users() if u.get("email") == email), None)
         if user and check_password_hash(user.get("senha", ""), request.form.get("senha", "")):
-            session.update({
-                "user_id": user["id"], 
-                "user_nome": user["nome"], 
-                "role": user.get("role", "user")
-            })
+            session.update({"user_id": user["id"], "user_nome": user["nome"], "role": user.get("role", "user")})
             return redirect(url_for("campeonatos"))
         flash("E-mail ou senha incorretos.", "danger")
     return render_template("login.html")
@@ -142,10 +129,9 @@ def logout():
 
 @app.route("/campeonatos")
 def campeonatos():
-    camps = get_camps()
-    return render_template("campeonatos.html", campeonatos=camps)
+    return render_template("campeonatos.html", campeonatos=get_camps())
 
-# --- ROTAS USUÁRIO LOGADO ---
+# --- ROTAS DE CONTEÚDO ---
 @app.route("/perfil", methods=["GET", "POST"])
 @login_required
 def perfil():
@@ -170,8 +156,7 @@ def detalhe_campeonato(id):
         flash("Campeonato não encontrado.", "warning")
         return redirect(url_for("campeonatos"))
     
-    users_list = get_users()
-    users_dict = {u["id"]: u["nome"] for u in users_list}
+    users_dict = {u["id"]: u["nome"] for u in get_users()}
     inscritos_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("inscritos", [])]
     espera_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("lista_espera", [])]
     

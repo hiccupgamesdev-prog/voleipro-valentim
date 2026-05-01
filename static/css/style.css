@@ -1,0 +1,199 @@
+/* ─── VôleiPro Premium Dark Theme ────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #00ffa3; /* Verde Neon */
+  --primary-glow: rgba(0, 255, 163, 0.3);
+  --secondary: #7000ff; /* Roxo Profundo */
+  --secondary-glow: rgba(112, 0, 255, 0.3);
+  --bg-dark: #050505;
+  --bg-card: rgba(20, 20, 25, 0.7);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text: #ffffff;
+  --text-muted: #a0a0a0;
+  --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 255, 163, 0.05) 0%, transparent 40%);
+}
+
+/* ─── Logo Redonda ──────────────────────────────────────────────────────── */
+.logo-round {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.logo-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary);
+  box-shadow: 0 0 30px var(--primary-glow);
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Splash Screen ──────────────────────────────────────────────────────── */
+#splash-screen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #000; display: flex; align-items: center; justify-content: center;
+  z-index: 9999; transition: opacity 0.8s ease, visibility 0.8s;
+}
+#splash-screen.hidden { opacity: 0; visibility: hidden; }
+.dragon-loader {
+  width: 150px; height: 150px;
+  background: url('/static/img/logo_hiccup.png') no-repeat center center;
+  background-size: cover; border-radius: 50%;
+  animation: pulse-dragon 2s infinite ease-in-out;
+  border: 4px solid var(--primary);
+}
+@keyframes pulse-dragon {
+  0%, 100% { transform: scale(0.95); box-shadow: 0 0 20px var(--primary-glow); }
+  50% { transform: scale(1.05); box-shadow: 0 0 50px var(--primary-glow); }
+}
+
+/* ─── Navbar ────────────────────────────────────────────────────────────── */
+.navbar {
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(15px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0.8rem 2rem;
+}
+.navbar-inner {
+  max-width: 1300px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.navbar-brand {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; font-weight: 800; font-size: 1.5rem;
+  background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-links a {
+  text-decoration: none; color: var(--text-muted); font-weight: 500;
+  transition: 0.3s; font-size: 0.95rem;
+}
+.nav-links a:hover { color: var(--primary); }
+.nav-btn {
+  background: var(--primary); color: #000 !important;
+  padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: 700;
+}
+
+/* ─── Hero Section ──────────────────────────────────────────────────────── */
+.hero {
+  padding: 180px 2rem 80px; text-align: center; position: relative;
+}
+
+.section-padding {
+  padding: 80px 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.spacer-y { margin-top: 2rem; margin-bottom: 2rem; }
+.gap-small { gap: 1rem; }
+.gap-medium { gap: 2rem; }
+.hero-content { max-width: 900px; margin: 0 auto; z-index: 2; position: relative; }
+.hero h1 {
+  font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; line-height: 1.1;
+  margin-bottom: 1.5rem; letter-spacing: -2px;
+}
+.hero h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 2.5rem; max-width: 600px; margin-inline: auto; }
+
+.floating-ball {
+  position: absolute; font-size: 3rem; opacity: 0.2;
+  animation: float 6s infinite ease-in-out; z-index: 1;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+/* ─── Cards & Sections ──────────────────────────────────────────────────── */
+.section-title { text-align: center; margin-bottom: 4rem; }
+.section-title h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+.section-title p { color: var(--text-muted); }
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; max-width: 1200px; margin: 0 auto;
+}
+
+.glass-card {
+  background: var(--bg-card); backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border); border-radius: 24px;
+  padding: 2.5rem; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative; overflow: hidden;
+}
+.glass-card:hover {
+  transform: translateY(-10px); border-color: var(--primary);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+}
+.glass-card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 1.5rem; display: block; }
+
+/* ─── Buttons ───────────────────────────────────────────────────────────── */
+.btn {
+  padding: 1rem 2.5rem; border-radius: 50px; font-weight: 700; cursor: pointer;
+  transition: 0.3s; border: none; text-decoration: none; display: inline-flex;
+  align-items: center; justify-content: center; gap: 10px; font-size: 1rem;
+}
+.btn-primary { background: var(--primary); color: #000; box-shadow: 0 10px 20px var(--primary-glow); }
+.btn-primary:hover { transform: scale(1.05); box-shadow: 0 15px 30px var(--primary-glow); }
+.btn-outline { background: transparent; border: 2px solid var(--glass-border); color: #fff; }
+.btn-outline:hover { background: var(--glass); border-color: var(--text); }
+
+/* ─── Footer ────────────────────────────────────────────────────────────── */
+.footer {
+  padding: 5rem 2rem; background: #000; border-top: 1px solid var(--glass-border);
+  text-align: center;
+}
+.footer-content { max-width: 1200px; margin: 0 auto; }
+.footer-logo { margin-bottom: 2rem; }
+.footer-credits { color: var(--text-muted); font-size: 0.9rem; }
+.footer-credits strong { color: #fff; }
+.hiccup-text { color: var(--primary); font-weight: 800; }
+
+/* ─── Forms ────────────────────────────────────────────────────────────── */
+.auth-container { 
+  max-width: 480px; 
+  margin: 160px auto 100px; 
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.form-group { margin-bottom: 1.8rem; }
+.form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-muted); }
+.form-input {
+  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+  padding: 1rem; border-radius: 12px; color: #fff; font-family: inherit; transition: 0.3s;
+}
+.form-input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.08); }
+
+/* ─── Dashboard ────────────────────────────────────────────────────────── */
+.main-content { padding: 120px 2rem 60px; max-width: 1300px; margin: 0 auto; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+.stat-card { background: var(--bg-card); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--glass-border); text-align: center; }
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero h1 { font-size: 3rem; }
+}

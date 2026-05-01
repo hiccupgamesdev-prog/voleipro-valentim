@@ -3,7 +3,7 @@ import uuid
 import logging
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -74,6 +74,11 @@ def admin_required(f):
             return redirect(url_for("index"))
         return f(*args, **kwargs)
     return decorated_function
+
+# --- SERVIR ARQUIVOS ESTÁTICOS ---
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(static_dir, filename)
 
 # --- ROTAS ---
 @app.route("/")

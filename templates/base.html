@@ -6,11 +6,12 @@
   <title>{% block title %}VôleiPro – Valentim Gentil{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
-<body>
+<body class="dark-theme">
   <!-- SPLASH SCREEN -->
   <div id="splash-screen">
-    <div class="dragon-loader"></div>
+    <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="pulse-logo">
   </div>
 
   <!-- NAVBAR -->
@@ -26,10 +27,16 @@
         {% if session.get('user_id') %}
           <a href="{{ url_for('campeonatos') }}">Campeonatos</a>
           {% if session.get('role') == 'admin' %}
-            <a href="{{ url_for('admin_dashboard') }}">Painel Admin</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-badge-nav">Painel Admin</a>
           {% endif %}
-          <a href="{{ url_for('perfil') }}">Meu Perfil</a>
-          <a href="{{ url_for('logout') }}" style="color: #ff4b4b;">Sair</a>
+          
+          <div class="nav-user-profile">
+            <a href="{{ url_for('perfil') }}" class="nav-profile-trigger">
+                <img src="{{ user_avatar }}" alt="Avatar" class="avatar-nav">
+                <span class="nav-user-name">{{ session.user_nome.split(' ')[0] }}</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="nav-logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
+          </div>
         {% else %}
           <a href="{{ url_for('login') }}">Entrar</a>
           <a href="{{ url_for('cadastro') }}" class="nav-btn">Cadastrar</a>
@@ -41,9 +48,9 @@
   <!-- FLASH MESSAGES -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div style="position: fixed; top: 100px; right: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 10px;">
+      <div class="flash-container">
         {% for category, message in messages %}
-          <div class="glass-card" style="padding: 1rem 2rem; border-left: 4px solid var(--primary); background: rgba(0,0,0,0.9);">
+          <div class="flash-card {{ category }}" data-aos="fade-left">
             {{ message }}
           </div>
         {% endfor %}
@@ -51,7 +58,9 @@
     {% endif %}
   {% endwith %}
 
-  {% block content %}{% endblock %}
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -63,29 +72,35 @@
         <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #fff;">🏐 <strong>VôleiPro – Valentim Gentil</strong></p>
         <p>Desenvolvido por <strong>Jhony Brando</strong></p>
         <p>Uma criação <span class="hiccup-text">Hiccup Games</span> &copy; 2026</p>
-        <div style="margin-top: 15px; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 50px; display: inline-block;">
+        <div class="db-status-badge">
           {% if db_status %}
-            <span style="color: #00ffa3; font-weight: bold;">🟢 SISTEMA ONLINE: Banco de Dados Conectado</span>
+            <span class="status-online">🟢 SISTEMA ONLINE: Banco de Dados Conectado</span>
           {% else %}
-            <span style="color: #ff4b4b; font-weight: bold;">🔴 ATENÇÃO: Banco Offline (Dados Temporários)</span>
+            <span class="status-offline">🔴 ATENÇÃO: Banco Offline (Dados Temporários)</span>
           {% endif %}
         </div>
       </div>
     </div>
   </footer>
 
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
+    AOS.init({ duration: 800, once: true });
+    
     // Splash Screen Handler
     window.addEventListener('load', function() {
       setTimeout(function() {
         const splash = document.getElementById('splash-screen');
-        if(splash) splash.classList.add('hidden');
+        if(splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 500);
+        }
       }, 1500);
     });
 
     // Auto-fechar flash após 5 segundos
     setTimeout(() => {
-      document.querySelectorAll('.flash-msg').forEach(el => el.style.opacity = '0');
+      document.querySelectorAll('.flash-card').forEach(el => el.style.opacity = '0');
     }, 5000);
   </script>
   {% block scripts %}{% endblock %}

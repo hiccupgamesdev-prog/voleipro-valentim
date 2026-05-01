@@ -1,5 +1,6 @@
 import os
 import uuid
+import hashlib
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
@@ -27,8 +28,13 @@ if MONGO_URI:
         print(f"Erro MongoDB: {e}")
 
 @app.context_processor
-def inject_db_status():
-    return dict(db_status=DB_CONNECTED)
+def inject_globals():
+    # Gerar URL do Gravatar para o usuário logado
+    avatar_url = None
+    if "user_email" in session:
+        email_hash = hashlib.md5(session["user_email"].lower().encode('utf-8')).hexdigest()
+        avatar_url = f"https://www.gravatar.com/avatar/{email_hash}?d=identicon&s=100"
+    return dict(db_status=DB_CONNECTED, user_avatar=avatar_url)
 
 # --- AUXILIARES ---
 def get_users():
@@ -100,7 +106,12 @@ def cadastro():
             new_user["role"] = "admin"
 
         save_user(new_user)
-        session.update({"user_id": new_user["id"], "user_nome": new_user["nome"], "role": new_user["role"]})
+        session.update({
+            "user_id": new_user["id"], 
+            "user_nome": new_user["nome"], 
+            "user_email": new_user["email"],
+            "role": new_user["role"]
+        })
         return redirect(url_for("campeonatos"))
     return render_template("cadastro.html")
 
@@ -110,7 +121,12 @@ def login():
         email = request.form.get("email", "").lower().strip()
         user = next((u for u in get_users() if u.get("email") == email), None)
         if user and check_password_hash(user.get("senha", ""), request.form.get("senha", "")):
-            session.update({"user_id": user["id"], "user_nome": user["nome"], "role": user.get("role", "user")})
+            session.update({
+                "user_id": user["id"], 
+                "user_nome": user["nome"], 
+                "user_email": user.get("email", ""),
+                "role": user.get("role", "user")
+            })
             return redirect(url_for("campeonatos"))
         flash("E-mail ou senha incorretos.", "danger")
     return render_template("login.html")
@@ -122,7 +138,13 @@ def logout():
 
 @app.route("/campeonatos")
 def campeonatos():
-    return render_template("campeonatos.html", campeonatos=get_camps())
+    try:
+        all_camps = get_camps()
+        return render_template("campeonatos.html", campeonatos=all_camps)
+    except Exception as e:
+        print(f"Erro na rota campeonatos: {e}")
+        flash("Erro ao carregar campeonatos.", "danger")
+        return redirect(url_for("index"))
 
 # --- ROTAS USUÁRIO LOGADO ---
 @app.route("/perfil", methods=["GET", "POST"])
@@ -149,7 +171,8 @@ def detalhe_campeonato(id):
         flash("Campeonato não encontrado.", "warning")
         return redirect(url_for("campeonatos"))
     
-    users_dict = {u["id"]: u["nome"] for u in get_users()}
+    users_list = get_users()
+    users_dict = {u["id"]: u["nome"] for u in users_list}
     inscritos_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("inscritos", [])]
     espera_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("lista_espera", [])]
     
@@ -260,17 +283,30 @@ def admin_editar_camp(id):
     if not camp: return redirect(url_for("admin_dashboard"))
     
     if request.method == "POST":
+        old_max = int(camp.get("max_participantes", 0))
+        new_max = int(request.form.get("max_participantes", old_max))
+        
         camp.update({
             "nome": request.form.get("nome", camp["nome"]),
             "data_evento": request.form.get("data", camp["data_evento"]),
             "hora_evento": request.form.get("hora", camp["hora_evento"]),
             "local": request.form.get("local", camp["local"]),
             "categoria": request.form.get("categoria", camp["categoria"]),
-            "max_participantes": request.form.get("max_participantes", camp["max_participantes"]),
+            "max_participantes": str(new_max),
             "regras": request.form.get("regras", camp["regras"])
         })
+        
+        # LÓGICA DE PROMOÇÃO AUTOMÁTICA
+        # Se aumentou o número de vagas, puxa da lista de espera
+        if "inscritos" not in camp: camp["inscritos"] = []
+        if "lista_espera" not in camp: camp["lista_espera"] = []
+        
+        while len(camp["inscritos"]) < new_max and camp["lista_espera"]:
+            promovido = camp["lista_espera"].pop(0)
+            camp["inscritos"].append(promovido)
+            
         save_camp(camp)
-        flash("Campeonato atualizado!", "success")
+        flash("Campeonato atualizado e lista de espera processada!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form_campeonato.html", camp=camp)
 

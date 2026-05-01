@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}VôleiPro – Valentim Gentil{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen">
+    <div class="dragon-loader"></div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="{{ url_for('index') }}" class="navbar-brand">
+        <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-round">
+        <span>VôleiPro</span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('campeonatos') }}">Campeonatos</a>
+          {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}">Painel Admin</a>
+          {% endif %}
+          <a href="{{ url_for('perfil') }}">Meu Perfil</a>
+          <a href="{{ url_for('logout') }}" style="color: #ff4b4b;">Sair</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Entrar</a>
+          <a href="{{ url_for('cadastro') }}" class="nav-btn">Cadastrar</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="position: fixed; top: 100px; right: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 10px;">
+        {% for category, message in messages %}
+          <div class="glass-card" style="padding: 1rem 2rem; border-left: 4px solid var(--primary); background: rgba(0,0,0,0.9);">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-large">
+      </div>
+      <div class="footer-credits">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #fff;">🏐 <strong>VôleiPro – Valentim Gentil</strong></p>
+        <p>Desenvolvido por <strong>Jhony Brando</strong></p>
+        <p>Uma criação <span class="hiccup-text">Hiccup Games</span> &copy; 2026</p>
+        <div style="margin-top: 10px; font-size: 0.7rem;">
+          {% if db_status %}
+            <span style="color: #00ffa3;">🟢 Banco Conectado (Dados Seguros)</span>
+          {% else %}
+            <span style="color: #ff4b4b;">🔴 Banco Offline (Modo Temporário)</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Splash Screen Handler
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const splash = document.getElementById('splash-screen');
+        if(splash) splash.classList.add('hidden');
+      }, 1500);
+    });
+
+    // Auto-fechar flash após 5 segundos
+    setTimeout(() => {
+      document.querySelectorAll('.flash-msg').forEach(el => el.style.opacity = '0');
+    }, 5000);
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

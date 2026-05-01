@@ -63,6 +63,13 @@
         <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #fff;">🏐 <strong>VôleiPro – Valentim Gentil</strong></p>
         <p>Desenvolvido por <strong>Jhony Brando</strong></p>
         <p>Uma criação <span class="hiccup-text">Hiccup Games</span> &copy; 2026</p>
+        <div style="margin-top: 10px; font-size: 0.7rem;">
+          {% if db_status %}
+            <span style="color: #00ffa3;">🟢 Banco Conectado (Dados Seguros)</span>
+          {% else %}
+            <span style="color: #ff4b4b;">🔴 Banco Offline (Modo Temporário)</span>
+          {% endif %}
+        </div>
       </div>
     </div>
   </footer>

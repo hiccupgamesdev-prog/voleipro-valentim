@@ -26,12 +26,10 @@ if MONGO_URI:
     except Exception as e:
         print(f"Erro MongoDB: {e}")
 
-# Context Processor global
 @app.context_processor
 def inject_db_status():
     return dict(db_status=DB_CONNECTED)
 
-# Funções de Acesso ao Banco (Sem tocar no disco JSON)
 def get_users():
     if DB_CONNECTED:
         return list(db.users.find())
@@ -50,12 +48,11 @@ def save_camp(camp_data):
     if DB_CONNECTED:
         db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
 
-# Rota para CSS/Imagens
 @app.route('/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
 
-# --- PROTEÇÃO DE ROTAS ---
+# --- PROTEÇÃO ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -68,12 +65,12 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("role") != "admin":
-            flash("Acesso restrito a administradores.", "danger")
+            flash("Acesso restrito.", "danger")
             return redirect(url_for("index"))
         return f(*args, **kwargs)
     return decorated_function
 
-# --- ROTAS PÚBLICAS ---
+# --- ROTAS ---
 @app.route("/")
 def index():
     all_camps = get_camps()
@@ -89,7 +86,6 @@ def cadastro():
         if any(u["email"] == email for u in users):
             flash("E-mail já cadastrado.", "danger")
             return redirect(url_for("cadastro"))
-
         new_user = {
             "id": str(uuid.uuid4()),
             "nome": request.form.get("nome"),
@@ -99,13 +95,10 @@ def cadastro():
             "role": "user",
             "data_cadastro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
-        
-        # Lógica de Admin
         if email == "jhonybrandoborges@gmail.com":
             new_user["role"] = "admin"
         elif len(users) == 0:
             new_user["role"] = "admin"
-
         save_user(new_user)
         session.update({"user_id": new_user["id"], "user_nome": new_user["nome"], "role": new_user["role"]})
         return redirect(url_for("campeonatos"))
@@ -131,13 +124,11 @@ def logout():
 def campeonatos():
     return render_template("campeonatos.html", campeonatos=get_camps())
 
-# --- ROTAS LOGADO ---
 @app.route("/perfil", methods=["GET", "POST"])
 @login_required
 def perfil():
     user = next((u for u in get_users() if u["id"] == session.get("user_id")), None)
     if not user: return redirect(url_for("logout"))
-    
     if request.method == "POST":
         user["nome"] = request.form.get("nome")
         user["telefone"] = request.form.get("telefone")
@@ -154,7 +145,17 @@ def detalhe_campeonato(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
     if not camp: return redirect(url_for("campeonatos"))
     u_id = session["user_id"]
-    return render_template("detalhe.html", camp=camp, inscrito=(u_id in camp.get("inscritos", [])), espera=(u_id in camp.get("lista_espera", [])))
+    
+    # Pegar nomes dos inscritos e lista de espera
+    users = {u["id"]: u["nome"] for u in get_users()}
+    inscritos_nomes = [users.get(uid, "Atleta") for uid in camp.get("inscritos", [])]
+    espera_nomes = [users.get(uid, "Atleta") for uid in camp.get("lista_espera", [])]
+    
+    return render_template("detalhe.html", camp=camp, 
+                           inscrito=(u_id in camp.get("inscritos", [])), 
+                           espera=(u_id in camp.get("lista_espera", [])),
+                           inscritos_nomes=inscritos_nomes,
+                           espera_nomes=espera_nomes)
 
 @app.route("/inscrever/<id>")
 @login_required
@@ -165,11 +166,41 @@ def inscrever(id):
     if u_id not in camp.get("inscritos", []) and u_id not in camp.get("lista_espera", []):
         if "inscritos" not in camp: camp["inscritos"] = []
         if "lista_espera" not in camp: camp["lista_espera"] = []
-        if len(camp["inscritos"]) < int(camp.get("max_participantes", 0)):
+        try:
+            max_p = int(camp.get("max_participantes", 0))
+        except:
+            max_p = 0
+            
+        if len(camp["inscritos"]) < max_p:
             camp["inscritos"].append(u_id)
+            flash("Inscrição confirmada!", "success")
         else:
             camp["lista_espera"].append(u_id)
+            flash("Você está na lista de espera.", "warning")
         save_camp(camp)
+    return redirect(url_for("detalhe_campeonato", id=id))
+
+@app.route("/cancelar_inscricao/<id>")
+@login_required
+def cancelar_inscricao(id):
+    camp = next((c for c in get_camps() if c["id"] == id), None)
+    if not camp: return redirect(url_for("campeonatos"))
+    u_id = session["user_id"]
+    
+    if u_id in camp.get("inscritos", []):
+        camp["inscritos"].remove(u_id)
+        # Promover o primeiro da lista de espera
+        if camp.get("lista_espera"):
+            promovido = camp["lista_espera"].pop(0)
+            camp["inscritos"].append(promovido)
+            flash("Inscrição cancelada. O próximo da fila foi promovido!", "info")
+        else:
+            flash("Inscrição cancelada.", "info")
+    elif u_id in camp.get("lista_espera", []):
+        camp["lista_espera"].remove(u_id)
+        flash("Sua posição na lista de espera foi removida.", "info")
+        
+    save_camp(camp)
     return redirect(url_for("detalhe_campeonato", id=id))
 
 # --- ROTAS ADMIN ---
@@ -197,15 +228,35 @@ def admin_promover(id):
 @admin_required
 def admin_novo_camp():
     if request.method == "POST":
-        save_camp({
-            "id": str(uuid.uuid4()), "nome": request.form.get("nome"),
-            "data_evento": request.form.get("data"), "hora_evento": request.form.get("hora"),
-            "local": request.form.get("local"), "categoria": request.form.get("categoria"),
-            "max_participantes": request.form.get("max_participantes"),
-            "regras": request.form.get("regras"), "inscritos": [], "lista_espera": []
-        })
-        return redirect(url_for("admin_dashboard"))
+        try:
+            new_camp = {
+                "id": str(uuid.uuid4()),
+                "nome": request.form.get("nome", "Novo Campeonato"),
+                "data_evento": request.form.get("data", ""),
+                "hora_evento": request.form.get("hora", ""),
+                "local": request.form.get("local", ""),
+                "categoria": request.form.get("categoria", "Geral"),
+                "max_participantes": request.form.get("max_participantes", "12"),
+                "regras": request.form.get("regras", ""),
+                "inscritos": [],
+                "lista_espera": []
+            }
+            save_camp(new_camp)
+            flash("Campeonato criado com sucesso!", "success")
+            return redirect(url_for("admin_dashboard"))
+        except Exception as e:
+            flash(f"Erro ao criar campeonato: {str(e)}", "danger")
+            return redirect(url_for("admin_novo_camp"))
+            
     return render_template("admin/form_campeonato.html", camp=None)
+
+@app.route("/admin/campeonatos/excluir/<id>")
+@admin_required
+def admin_excluir_camp(id):
+    if DB_CONNECTED:
+        db.campeonatos.delete_one({"id": id})
+        flash("Campeonato excluído.", "info")
+    return redirect(url_for("admin_dashboard"))
 
 if __name__ == "__main__":
     app.run()

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-123")
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
@@ -141,8 +141,10 @@ def cadastro():
             "data_cadastro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Primeiro usuário é admin
-        if len(users) == 0:
+        # Configuração Admin do Jhony
+        if email == "jhonybrandoborges@gmail.com":
+            new_user["role"] = "admin"
+        elif len(users) == 0:
             new_user["role"] = "admin"
 
         save_user(new_user)

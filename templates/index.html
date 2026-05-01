@@ -43,7 +43,7 @@
       </div>
       <h3 style="margin-bottom: 1rem;">{{ camp.nome }}</h3>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;"><i class="fas fa-map-marker-alt"></i> {{ camp.local }}</p>
-      <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%;">Inscrever-se</a>
+      <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%;">Ver Detalhes</a>
     </div>
     {% else %}
     <div class="glass-card" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
@@ -79,7 +79,8 @@
   </div>
 </section>
 
-<!-- CTA -->
+<!-- CTA (Escondido se logado) -->
+{% if not session.get('user_id') %}
 <section class="section-padding" style="text-align: center;">
   <div class="glass-card" style="background: var(--gradient); border: none; padding: 4rem 2rem;" data-aos="zoom-in">
     <h2 style="color: #000; font-size: 2.5rem; margin-bottom: 1rem;">Pronto para o saque?</h2>
@@ -87,6 +88,7 @@
     <a href="{{ url_for('cadastro') }}" class="btn" style="background: #000; color: #fff;">Criar Conta Grátis</a>
   </div>
 </section>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

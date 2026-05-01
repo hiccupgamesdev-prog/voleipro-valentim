@@ -32,18 +32,30 @@ def inject_globals():
 
 # --- AUXILIARES ---
 def get_users():
-    return list(db.users.find()) if DB_CONNECTED else []
+    try:
+        return list(db.users.find()) if DB_CONNECTED else []
+    except:
+        return []
 
 def save_user(user_data):
     if DB_CONNECTED:
-        db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
+        try:
+            db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
+        except:
+            pass
 
 def get_camps():
-    return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
+    try:
+        return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
+    except:
+        return []
 
 def save_camp(camp_data):
     if DB_CONNECTED:
-        db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
+        try:
+            db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
+        except:
+            pass
 
 # --- PROTEÇÃO ---
 def login_required(f):
@@ -130,7 +142,8 @@ def logout():
 
 @app.route("/campeonatos")
 def campeonatos():
-    return render_template("campeonatos.html", campeonatos=get_camps())
+    camps = get_camps()
+    return render_template("campeonatos.html", campeonatos=camps)
 
 # --- ROTAS USUÁRIO LOGADO ---
 @app.route("/perfil", methods=["GET", "POST"])

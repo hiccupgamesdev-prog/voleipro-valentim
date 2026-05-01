@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}VôleiPro – Valentim Gentil{% endblock %}</title>
+  <!-- Usando caminhos absolutos para garantir o carregamento na Vercel -->
   <link rel="stylesheet" href="/static/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -32,8 +33,8 @@
           
           <div class="nav-user-profile">
             <a href="{{ url_for('perfil') }}" class="nav-profile-trigger">
-                <div class="avatar-letter">{{ session.user_nome[0] | upper }}</div>
-                <span class="nav-user-name">{{ session.user_nome.split(' ')[0] }}</span>
+                <div class="avatar-letter">{{ session.user_nome[0] | upper if session.user_nome else 'A' }}</div>
+                <span class="nav-user-name">{{ session.user_nome.split(' ')[0] if session.user_nome else 'Atleta' }}</span>
             </a>
             <a href="{{ url_for('logout') }}" class="nav-logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
           </div>

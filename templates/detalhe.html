@@ -4,7 +4,7 @@
 {% block content %}
 <div class="section-padding" style="margin-top: 100px;">
     <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;" data-aos="fade-right">
-        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 8px 15px;">← Voltar</a>
+        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 0.7rem 1.5rem; font-size: 0.9rem;">← Voltar</a>
         <h1 style="margin: 0;">Detalhes do <span>Campeonato</span></h1>
     </div>
 
@@ -74,23 +74,23 @@
                     <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">✅</div>
                     <h3>Você está <span>Confirmado!</span></h3>
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">Prepare o uniforme e nos vemos em quadra.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: #ff4b4b;">Cancelar Minha Inscrição</a>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: #ff4b4b; padding: 0.9rem 2rem;">Cancelar Minha Inscrição</a>
                 {% elif espera %}
                     <div style="color: #ffb800; font-size: 3rem; margin-bottom: 1rem;">⏳</div>
                     <h3>Você está na <span>Espera</span></h3>
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">Se alguém desistir, você será promovido automaticamente.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: #ffb800;">Sair da Fila</a>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: #ffb800; padding: 0.9rem 2rem;">Sair da Fila</a>
                 {% else %}
                     <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">🏐</div>
                     <h3>Vagas <span>Disponíveis</span></h3>
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">Garanta seu lugar antes que as vagas acabem.</p>
-                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%;">Quero Participar</a>
+                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem;">Quero Participar</a>
                 {% endif %}
                 
                 {% if session.role == 'admin' %}
                 <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Acesso Administrativo</p>
-                <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem;" onclick="return confirm('Excluir este campeonato?')">Excluir Campeonato</a>
+                <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem; padding: 0.8rem 1.5rem;" onclick="return confirm('Excluir este campeonato?')">Excluir Campeonato</a>
                 {% endif %}
             </div>
         </div>

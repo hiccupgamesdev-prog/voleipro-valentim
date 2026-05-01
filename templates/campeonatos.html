@@ -12,10 +12,10 @@
             <div class="glass-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
                     <span class="badge" style="background: rgba(112, 0, 255, 0.15); color: var(--secondary); border: 1px solid rgba(112, 0, 255, 0.3);">{{ camp.categoria }}</span>
-                    <span style="font-weight: 800; color: var(--primary);">{{ camp.data_evento }}</span>
+                    <span style="font-weight: 600; color: var(--primary);">{{ camp.data_evento }}</span>
                 </div>
                 
-                <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">{{ camp.nome }}</h3>
+                <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem;">{{ camp.nome }}</h3>
                 
                 <div style="color: var(--text-muted); margin-bottom: 2rem;">
                     <p style="margin-bottom: 8px;"><i class="fas fa-clock" style="width: 20px; color: var(--primary);"></i> {{ camp.hora_evento }}</p>
@@ -30,14 +30,14 @@
                     <div class="progress-bar" style="width: {{ percent }}%; height: 100%; background: var(--gradient); box-shadow: 0 0 10px var(--primary-glow);"></div>
                 </div>
 
-                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%;">Ver Detalhes</a>
+                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem;">Ver Detalhes</a>
             </div>
         {% else %}
             <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 6rem;">
                 <i class="fas fa-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1.5rem;"></i>
                 <h2>Nenhum campeonato encontrado</h2>
                 <p style="color: var(--text-muted);">Tente novamente mais tarde ou fale com um organizador.</p>
-                <a href="{{ url_for('index') }}" class="btn btn-outline" style="margin-top: 2rem;">Voltar para Home</a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline" style="margin-top: 2rem; padding: 0.95rem 2rem;">Voltar para Home</a>
             </div>
         {% endfor %}
     </div>

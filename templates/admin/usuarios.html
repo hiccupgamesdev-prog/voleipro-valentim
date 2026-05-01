@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Usuários – Admin – VôleiPro{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  {% include "admin/_sidebar.html" %}
+
+  <div>
+    <div class="page-header">
+      <div>
+        <h1>👥 Usuários</h1>
+        <p>Gerencie os usuários cadastrados no sistema</p>
+      </div>
+    </div>
+
+    <div class="card">
+      {% if users %}
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Função</th>
+                <th>Inscrições</th>
+                <th>Cadastro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td style="font-weight:600;">{{ u.nome }}</td>
+                <td style="color:#64748b; font-size:.85rem;">{{ u.email }}</td>
+                <td style="color:#64748b; font-size:.85rem;">{{ u.telefone }}</td>
+                <td>
+                  {% if u.role == 'admin' %}
+                    <span class="badge badge-warning">Admin</span>
+                  {% else %}
+                    <span class="badge badge-info">Usuário</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:center;">
+                  <span class="badge badge-muted">{{ u.qtd_inscricoes }}</span>
+                </td>
+                <td style="color:#64748b; font-size:.85rem;">
+                  {{ u.criado_em[:10] | replace('-', '/') if u.criado_em else '—' }}
+                </td>
+                <td>
+                  <div style="display:flex; gap:.4rem; flex-wrap:wrap;">
+                    {% if u.id != session.user_id %}
+                      <form method="POST" action="{{ url_for('admin_promover_usuario', user_id=u.id) }}">
+                        <button type="submit" class="btn btn-warning btn-sm" title="Alternar Admin/Usuário">
+                          {% if u.role == 'admin' %}↓ Rebaixar{% else %}↑ Admin{% endif %}
+                        </button>
+                      </form>
+                      <form method="POST" action="{{ url_for('admin_excluir_usuario', user_id=u.id) }}"
+                            onsubmit="return confirm('Excluir o usuário {{ u.nome }}? Suas inscrições também serão removidas.')">
+                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                      </form>
+                    {% else %}
+                      <span style="font-size:.8rem; color:#94a3b8; font-style:italic;">Você</span>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state" style="padding:2rem;">
+          <div class="icon">👥</div>
+          <h3>Nenhum usuário cadastrado</h3>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

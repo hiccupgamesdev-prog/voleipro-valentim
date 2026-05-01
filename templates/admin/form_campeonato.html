@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{% if camp %}Editar{% else %}Novo{% endif %} Campeonato – VôleiPro{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  {% include "admin/_sidebar.html" %}
+
+  <div>
+    <div class="breadcrumb">
+      <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+      <span>›</span>
+      <span>{% if camp %}Editar Campeonato{% else %}Novo Campeonato{% endif %}</span>
+    </div>
+
+    <div class="page-header">
+      <div>
+        <h1>{% if camp %}✏️ Editar Campeonato{% else %}➕ Novo Campeonato{% endif %}</h1>
+        <p>{% if camp %}Altere as informações do campeonato{% else %}Preencha os dados para criar um novo campeonato{% endif %}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <form method="POST">
+        <div class="form-group">
+          <label class="form-label" for="nome">Nome do Campeonato <span class="req">*</span></label>
+          <input type="text" id="nome" name="nome" class="form-control"
+                 value="{{ camp.nome if camp else '' }}"
+                 placeholder="Ex: Campeonato Municipal de Vôlei 2026" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="categoria">Categoria</label>
+            <input type="text" id="categoria" name="categoria" class="form-control"
+                   value="{{ camp.categoria if camp else '' }}"
+                   placeholder="Ex: Masculino, Feminino, Misto" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="max_participantes">Máx. de Participantes <span class="req">*</span></label>
+            <input type="number" id="max_participantes" name="max_participantes" class="form-control"
+                   value="{{ camp.max_participantes if camp else '' }}"
+                   min="1" placeholder="Ex: 12" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="data_evento">Data do Evento <span class="req">*</span></label>
+            <input type="date" id="data_evento" name="data_evento" class="form-control"
+                   value="{{ camp.data_evento if camp else '' }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="hora_evento">Horário</label>
+            <input type="time" id="hora_evento" name="hora_evento" class="form-control"
+                   value="{{ camp.hora_evento if camp else '' }}" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="local">Local <span class="req">*</span></label>
+          <input type="text" id="local" name="local" class="form-control"
+                 value="{{ camp.local if camp else '' }}"
+                 placeholder="Ex: Ginásio Municipal de Valentim Gentil" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" class="form-control"
+                    placeholder="Descreva o campeonato, informações importantes, etc.">{{ camp.descricao if camp else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regras">Regras</label>
+          <textarea id="regras" name="regras" class="form-control" style="min-height:120px;"
+                    placeholder="Liste as regras do campeonato...">{{ camp.regras if camp else '' }}</textarea>
+          <p class="form-hint">Cada linha será exibida como um parágrafo.</p>
+        </div>
+
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:.5rem;">
+          <button type="submit" class="btn btn-primary btn-lg">
+            {% if camp %}Salvar Alterações{% else %}Criar Campeonato{% endif %}
+          </button>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

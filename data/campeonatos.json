@@ -1,0 +1,18 @@
+[
+  {
+    "id": "5fceccf3-d2bb-46fb-9670-2a6762dbc45c",
+    "nome": "Campeonato Municipal de Vôlei 2026",
+    "descricao": "Campeonato anual de vôlei da cidade de Valentim Gentil. Venha participar!",
+    "local": "Ginásio Municipal de Valentim Gentil",
+    "data_evento": "2026-06-15",
+    "hora_evento": "09:00",
+    "max_participantes": 12,
+    "regras": "- Cada equipe deve ter no mínimo 6 jogadores\r\n- Uso de uniforme obrigatório\r\n- Pontualidade exigida",
+    "categoria": "Masculino",
+    "inscritos": [
+      "1"
+    ],
+    "lista_espera": [],
+    "criado_em": "2026-04-29T22:22:43.559636"
+  }
+]

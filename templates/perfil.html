@@ -1,82 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Meu Perfil – VôleiPro{% endblock %}
+{% block title %}Meu Perfil - VôleiPro{% endblock %}
 
 {% block content %}
-<div style="max-width: 560px; margin: 0 auto;">
-  <div class="page-header">
-    <div>
-      <h1>👤 Meu Perfil</h1>
-      <p>Atualize seus dados pessoais</p>
+<div class="auth-container" style="margin-top: 150px;" data-aos="zoom-in">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
+        <h1>Meu <span>Perfil</span></h1>
+        <p style="color: var(--text-muted);">Mantenha seus dados de atleta atualizados.</p>
     </div>
-  </div>
 
-  <div class="card">
-    <form method="POST" action="{{ url_for('meu_perfil') }}">
-
-      <div class="form-group">
-        <label class="form-label" for="nome">Nome completo <span class="req">*</span></label>
-        <input type="text" id="nome" name="nome" class="form-control"
-               value="{{ user.nome }}" required />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="email">E-mail</label>
-        <input type="email" class="form-control" value="{{ user.email }}" disabled
-               style="background:#f8fafc; color:#94a3b8;" />
-        <p class="form-hint">O e-mail não pode ser alterado.</p>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="telefone">Telefone / WhatsApp</label>
-        <input type="tel" id="telefone" name="telefone" class="form-control"
-               value="{{ user.telefone }}" placeholder="(17) 99999-9999" />
-      </div>
-
-      <hr style="border:none; border-top:1px solid #e2e8f0; margin:1.5rem 0;" />
-      <h3 style="font-size:1rem; font-weight:700; margin-bottom:1rem; color:#475569;">
-        Alterar Senha <span style="font-size:.8rem; font-weight:400;">(opcional)</span>
-      </h3>
-
-      <div class="form-group">
-        <label class="form-label" for="senha_atual">Senha atual</label>
-        <input type="password" id="senha_atual" name="senha_atual" class="form-control"
-               placeholder="Digite sua senha atual" autocomplete="current-password" />
-      </div>
-
-      <div class="form-row">
+    <form method="POST" class="glass-card">
         <div class="form-group">
-          <label class="form-label" for="nova_senha">Nova senha</label>
-          <input type="password" id="nova_senha" name="nova_senha" class="form-control"
-                 placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            <label class="form-label">Nome Completo</label>
+            <input type="text" name="nome" class="form-input" value="{{ user.nome }}" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
-          <input type="password" id="confirmar_senha" name="confirmar_senha" class="form-control"
-                 placeholder="Repita a nova senha" autocomplete="new-password" />
+            <label class="form-label">E-mail (Não pode ser alterado)</label>
+            <input type="email" class="form-input" value="{{ user.email }}" disabled style="opacity: 0.5; cursor: not-allowed;">
         </div>
-      </div>
-
-      <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:.5rem;">
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline">Cancelar</a>
-      </div>
+        <div class="form-group">
+            <label class="form-label">Telefone / WhatsApp</label>
+            <input type="text" name="telefone" class="form-input" value="{{ user.telefone }}" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Nova Senha (Deixe em branco para não alterar)</label>
+            <input type="password" name="nova_senha" class="form-input" placeholder="Mínimo 6 caracteres">
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Salvar Alterações</button>
     </form>
-  </div>
-
-  <div class="card mt-2" style="background:#fff5f5; border-color:#fecaca;">
-    <h3 style="font-size:.95rem; font-weight:700; color:#991b1b; margin-bottom:.5rem;">Informações da Conta</h3>
-    <p style="font-size:.85rem; color:#64748b;">
-      <strong>Função:</strong>
-      {% if user.role == 'admin' %}
-        <span class="badge badge-warning">Administrador</span>
-      {% else %}
-        <span class="badge badge-info">Usuário</span>
-      {% endif %}
-    </p>
-    <p style="font-size:.85rem; color:#64748b; margin-top:.5rem;">
-      <strong>Membro desde:</strong>
-      {{ user.criado_em[:10] | replace('-', '/') if user.criado_em else 'N/D' }}
-    </p>
-  </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('logout') }}" style="color: #ff4b4b; font-weight: 600; text-decoration: none;">Sair da Conta</a>
+    </div>
 </div>
 {% endblock %}

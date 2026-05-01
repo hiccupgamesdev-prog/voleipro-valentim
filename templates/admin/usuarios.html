@@ -1,81 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Usuários – Admin – VôleiPro{% endblock %}
+{% block title %}Gerenciar Usuários - Admin{% endblock %}
 
 {% block content %}
-<div class="admin-layout">
-  {% include "admin/_sidebar.html" %}
-
-  <div>
-    <div class="page-header">
-      <div>
-        <h1>👥 Usuários</h1>
-        <p>Gerencie os usuários cadastrados no sistema</p>
-      </div>
+<div class="section-padding" style="margin-top: 100px;">
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;" data-aos="fade-right">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline" style="padding: 8px 15px;">← Voltar ao Painel</a>
+        <h1 style="margin: 0;">Gerenciar <span>Usuários</span></h1>
     </div>
 
-    <div class="card">
-      {% if users %}
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Telefone</th>
-                <th>Função</th>
-                <th>Inscrições</th>
-                <th>Cadastro</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for u in users %}
-              <tr>
-                <td style="font-weight:600;">{{ u.nome }}</td>
-                <td style="color:#64748b; font-size:.85rem;">{{ u.email }}</td>
-                <td style="color:#64748b; font-size:.85rem;">{{ u.telefone }}</td>
-                <td>
-                  {% if u.role == 'admin' %}
-                    <span class="badge badge-warning">Admin</span>
-                  {% else %}
-                    <span class="badge badge-info">Usuário</span>
-                  {% endif %}
-                </td>
-                <td style="text-align:center;">
-                  <span class="badge badge-muted">{{ u.qtd_inscricoes }}</span>
-                </td>
-                <td style="color:#64748b; font-size:.85rem;">
-                  {{ u.criado_em[:10] | replace('-', '/') if u.criado_em else '—' }}
-                </td>
-                <td>
-                  <div style="display:flex; gap:.4rem; flex-wrap:wrap;">
-                    {% if u.id != session.user_id %}
-                      <form method="POST" action="{{ url_for('admin_promover_usuario', user_id=u.id) }}">
-                        <button type="submit" class="btn btn-warning btn-sm" title="Alternar Admin/Usuário">
-                          {% if u.role == 'admin' %}↓ Rebaixar{% else %}↑ Admin{% endif %}
-                        </button>
-                      </form>
-                      <form method="POST" action="{{ url_for('admin_excluir_usuario', user_id=u.id) }}"
-                            onsubmit="return confirm('Excluir o usuário {{ u.nome }}? Suas inscrições também serão removidas.')">
-                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
-                      </form>
-                    {% else %}
-                      <span style="font-size:.8rem; color:#94a3b8; font-style:italic;">Você</span>
-                    {% endif %}
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <div class="glass-card" style="padding: 0; overflow: hidden;" data-aos="fade-up">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--glass-border);">
+                        <th style="padding: 20px; color: var(--primary);">Nome</th>
+                        <th style="padding: 20px; color: var(--primary);">E-mail / WhatsApp</th>
+                        <th style="padding: 20px; color: var(--primary);">Função</th>
+                        <th style="padding: 20px; text-align: right; color: var(--primary);">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 20px; font-weight: 600;">{{ u.nome }}</td>
+                        <td style="padding: 20px;">
+                            <div style="font-size: 0.9rem;">{{ u.email }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ u.telefone }}</div>
+                        </td>
+                        <td style="padding: 20px;">
+                            {% if u.role == 'admin' %}
+                                <span class="badge" style="background: var(--primary); color: #000; font-weight: 800;">ADMIN</span>
+                            {% else %}
+                                <span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;">JOGADOR</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 20px; text-align: right;">
+                            {% if u.role != 'admin' %}
+                                <a href="{{ url_for('admin_promover', id=u.id) }}" class="btn btn-primary" style="padding: 5px 15px; font-size: 0.8rem;">Tornar Admin</a>
+                            {% else %}
+                                <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Acesso Total</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-      {% else %}
-        <div class="empty-state" style="padding:2rem;">
-          <div class="icon">👥</div>
-          <h3>Nenhum usuário cadastrado</h3>
-        </div>
-      {% endif %}
     </div>
-  </div>
 </div>
 {% endblock %}

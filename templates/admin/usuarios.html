@@ -35,11 +35,17 @@
                             {% endif %}
                         </td>
                         <td style="padding: 20px; text-align: right;">
-                            {% if u.role != 'admin' %}
-                                <a href="{{ url_for('admin_promover', id=u.id) }}" class="btn btn-primary" style="padding: 5px 15px; font-size: 0.8rem;">Tornar Admin</a>
-                            {% else %}
-                                <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Acesso Total</span>
-                            {% endif %}
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                {% if u.role != 'admin' %}
+                                    <a href="{{ url_for('admin_promover', id=u.id) }}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.75rem; border-color: var(--primary); color: var(--primary);">Promover</a>
+                                {% endif %}
+                                
+                                {% if u.id != session.user_id %}
+                                    <a href="{{ url_for('admin_excluir_usuario', id=u.id) }}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.75rem; border-color: #ff4b4b; color: #ff4b4b;" onclick="return confirm('Excluir este usuário permanentemente?')">Excluir</a>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Você</span>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

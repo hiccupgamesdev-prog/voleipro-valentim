@@ -1,54 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Novo Campeonato - Admin{% endblock %}
+{% block title %}{% if camp %}Editar{% else %}Novo{% endif %} Campeonato - Admin{% endblock %}
 
 {% block content %}
 <div class="auth-container" style="margin-top: 150px; max-width: 700px;" data-aos="zoom-in">
     <div style="text-align: center; margin-bottom: 2rem;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🏆</div>
-        <h1>Novo <span>Campeonato</span></h1>
-        <p style="color: var(--text-muted);">Preencha os dados para abrir as inscrições.</p>
+        <div style="font-size: 3rem; margin-bottom: 1rem;">{% if camp %}✏️{% else %}🏆{% endif %}</div>
+        <h1>{% if camp %}Editar{% else %}Novo{% endif %} <span>Campeonato</span></h1>
+        <p style="color: var(--text-muted);">{% if camp %}Atualize as informações do torneio.{% else %}Preencha os dados para abrir as inscrições.{% endif %}</p>
     </div>
 
     <form method="POST" class="glass-card">
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label class="form-label">Nome do Campeonato</label>
-                <input type="text" name="nome" class="form-input" placeholder="Ex: Torneio de Verão" required>
+                <input type="text" name="nome" class="form-input" value="{{ camp.nome if camp else '' }}" placeholder="Ex: Torneio de Verão" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Data</label>
-                <input type="date" name="data" class="form-input" required>
+                <input type="date" name="data" class="form-input" value="{{ camp.data_evento if camp else '' }}" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Horário</label>
-                <input type="time" name="hora" class="form-input" required>
+                <input type="time" name="hora" class="form-input" value="{{ camp.hora_evento if camp else '' }}" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Local</label>
-                <input type="text" name="local" class="form-input" placeholder="Ex: Ginásio Municipal" required>
+                <input type="text" name="local" class="form-input" value="{{ camp.local if camp else '' }}" placeholder="Ex: Ginásio Municipal" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Categoria</label>
                 <select name="categoria" class="form-input">
-                    <option value="Masculino">Masculino</option>
-                    <option value="Feminino">Feminino</option>
-                    <option value="Misto">Misto</option>
-                    <option value="Geral">Geral</option>
+                    <option value="Masculino" {% if camp and camp.categoria == 'Masculino' %}selected{% endif %}>Masculino</option>
+                    <option value="Feminino" {% if camp and camp.categoria == 'Feminino' %}selected{% endif %}>Feminino</option>
+                    <option value="Misto" {% if camp and camp.categoria == 'Misto' %}selected{% endif %}>Misto</option>
+                    <option value="Geral" {% if camp and camp.categoria == 'Geral' or not camp %}selected{% endif %}>Geral</option>
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Máximo de Participantes</label>
-                <input type="number" name="max_participantes" class="form-input" value="12" min="1" required>
+                <input type="number" name="max_participantes" class="form-input" value="{{ camp.max_participantes if camp else '12' }}" min="1" required>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label class="form-label">Regras e Descrição</label>
-                <textarea name="regras" class="form-input" rows="5" placeholder="Escreva as regras do campeonato aqui..."></textarea>
+                <textarea name="regras" class="form-input" rows="5" placeholder="Escreva as regras do campeonato aqui...">{{ camp.regras if camp else '' }}</textarea>
             </div>
         </div>
         
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline" style="flex: 1;">Cancelar</a>
-            <button type="submit" class="btn btn-primary" style="flex: 2;">Criar Campeonato</button>
+            <button type="submit" class="btn btn-primary" style="flex: 2;">{% if camp %}Salvar Alterações{% else %}Criar Campeonato{% endif %}</button>
         </div>
     </form>
 </div>

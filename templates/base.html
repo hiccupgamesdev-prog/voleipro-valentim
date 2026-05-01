@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}VôleiPro – Valentim Gentil{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="/static/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body class="dark-theme">
   <!-- SPLASH SCREEN -->
   <div id="splash-screen">
-    <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="pulse-logo">
+    <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="pulse-logo">
   </div>
 
   <!-- NAVBAR -->
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="{{ url_for('index') }}" class="navbar-brand">
-        <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-round">
+        <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="logo-round">
         <span>VôleiPro</span>
       </a>
       
@@ -32,7 +32,7 @@
           
           <div class="nav-user-profile">
             <a href="{{ url_for('perfil') }}" class="nav-profile-trigger">
-                <img src="{{ user_avatar }}" alt="Avatar" class="avatar-nav">
+                <div class="avatar-letter">{{ session.user_nome[0] | upper }}</div>
                 <span class="nav-user-name">{{ session.user_nome.split(' ')[0] }}</span>
             </a>
             <a href="{{ url_for('logout') }}" class="nav-logout-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
@@ -66,7 +66,7 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-logo">
-        <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-large">
+        <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="logo-large">
       </div>
       <div class="footer-credits">
         <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #fff;">🏐 <strong>VôleiPro – Valentim Gentil</strong></p>
@@ -95,7 +95,7 @@
             splash.style.opacity = '0';
             setTimeout(() => splash.style.display = 'none', 500);
         }
-      }, 1500);
+      }, 1000);
     });
 
     // Auto-fechar flash após 5 segundos

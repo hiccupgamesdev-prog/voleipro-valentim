@@ -1,16 +1,15 @@
 import os
 import uuid
-import hashlib
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-123")
 
 # --- BANCO DE DADOS ---
@@ -29,12 +28,7 @@ if MONGO_URI:
 
 @app.context_processor
 def inject_globals():
-    # Gerar URL do Gravatar para o usuário logado
-    avatar_url = None
-    if "user_email" in session:
-        email_hash = hashlib.md5(session["user_email"].lower().encode('utf-8')).hexdigest()
-        avatar_url = f"https://www.gravatar.com/avatar/{email_hash}?d=identicon&s=100"
-    return dict(db_status=DB_CONNECTED, user_avatar=avatar_url)
+    return dict(db_status=DB_CONNECTED)
 
 # --- AUXILIARES ---
 def get_users():
@@ -109,7 +103,6 @@ def cadastro():
         session.update({
             "user_id": new_user["id"], 
             "user_nome": new_user["nome"], 
-            "user_email": new_user["email"],
             "role": new_user["role"]
         })
         return redirect(url_for("campeonatos"))
@@ -124,7 +117,6 @@ def login():
             session.update({
                 "user_id": user["id"], 
                 "user_nome": user["nome"], 
-                "user_email": user.get("email", ""),
                 "role": user.get("role", "user")
             })
             return redirect(url_for("campeonatos"))
@@ -138,13 +130,7 @@ def logout():
 
 @app.route("/campeonatos")
 def campeonatos():
-    try:
-        all_camps = get_camps()
-        return render_template("campeonatos.html", campeonatos=all_camps)
-    except Exception as e:
-        print(f"Erro na rota campeonatos: {e}")
-        flash("Erro ao carregar campeonatos.", "danger")
-        return redirect(url_for("index"))
+    return render_template("campeonatos.html", campeonatos=get_camps())
 
 # --- ROTAS USUÁRIO LOGADO ---
 @app.route("/perfil", methods=["GET", "POST"])
@@ -296,8 +282,6 @@ def admin_editar_camp(id):
             "regras": request.form.get("regras", camp["regras"])
         })
         
-        # LÓGICA DE PROMOÇÃO AUTOMÁTICA
-        # Se aumentou o número de vagas, puxa da lista de espera
         if "inscritos" not in camp: camp["inscritos"] = []
         if "lista_espera" not in camp: camp["lista_espera"] = []
         
@@ -306,7 +290,7 @@ def admin_editar_camp(id):
             camp["inscritos"].append(promovido)
             
         save_camp(camp)
-        flash("Campeonato atualizado e lista de espera processada!", "success")
+        flash("Campeonato atualizado!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form_campeonato.html", camp=camp)
 

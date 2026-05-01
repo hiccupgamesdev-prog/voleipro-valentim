@@ -4,8 +4,8 @@
      class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
     📊 Dashboard
   </a>
-  <a href="{{ url_for('admin_novo_campeonato') }}"
-     class="{% if request.endpoint == 'admin_novo_campeonato' %}active{% endif %}">
+  <a href="{{ url_for('admin_novo_camp') }}"
+     class="{% if request.endpoint == 'admin_novo_camp' %}active{% endif %}">
     ➕ Novo Campeonato
   </a>
   <a href="{{ url_for('admin_usuarios') }}"

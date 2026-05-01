@@ -11,12 +11,14 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Configuração de logs para ajudar no debug da Vercel
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configuração de caminhos dinâmicos para a Vercel
+# Isso garante que o Flask sempre encontre as pastas, não importa onde a Vercel as coloque
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+template_dir = os.path.join(BASE_DIR, 'templates')
+static_dir = os.path.join(BASE_DIR, 'static')
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-final-v10")
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-v11-final")
 
 # --- BANCO DE DADOS ---
 MONGO_URI = os.environ.get("MONGO_URI")
@@ -29,44 +31,33 @@ if MONGO_URI:
         client.admin.command('ping')
         db = client.get_database("voleipro")
         DB_CONNECTED = True
-        logger.info("MongoDB Conectado com sucesso!")
     except Exception as e:
-        logger.error(f"Erro ao conectar no MongoDB: {e}")
+        print(f"Erro MongoDB: {e}")
 
 @app.context_processor
 def inject_globals():
     return dict(db_status=DB_CONNECTED)
 
-# --- FUNÇÕES DE ACESSO AO BANCO ---
+# --- FUNÇÕES DE APOIO ---
 def get_users():
-    try:
-        return list(db.users.find()) if DB_CONNECTED else []
-    except Exception as e:
-        logger.error(f"Erro get_users: {e}")
-        return []
+    try: return list(db.users.find()) if DB_CONNECTED else []
+    except: return []
 
 def save_user(user_data):
     if DB_CONNECTED:
-        try:
-            db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
-        except Exception as e:
-            logger.error(f"Erro save_user: {e}")
+        try: db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
+        except: pass
 
 def get_camps():
-    try:
-        return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
-    except Exception as e:
-        logger.error(f"Erro get_camps: {e}")
-        return []
+    try: return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
+    except: return []
 
 def save_camp(camp_data):
     if DB_CONNECTED:
-        try:
-            db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
-        except Exception as e:
-            logger.error(f"Erro save_camp: {e}")
+        try: db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
+        except: pass
 
-# --- DECORADORES ---
+# --- PROTEÇÃO ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -79,7 +70,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("role") != "admin":
-            flash("Acesso restrito apenas para administradores.", "danger")
+            flash("Acesso restrito.", "danger")
             return redirect(url_for("index"))
         return f(*args, **kwargs)
     return decorated_function
@@ -95,17 +86,15 @@ def index():
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     if request.method == "POST":
-        nome = request.form.get("nome", "").strip()
         email = request.form.get("email", "").lower().strip()
-        senha = request.form.get("senha", "")
-        
-        if not nome or not email or not senha:
-            flash("Preencha todos os campos obrigatórios.", "danger")
+        nome = request.form.get("nome", "").strip()
+        if not email or not nome:
+            flash("Preencha os campos obrigatórios.", "danger")
             return redirect(url_for("cadastro"))
         
         users = get_users()
         if any(u.get("email") == email for u in users):
-            flash("Este e-mail já está cadastrado.", "danger")
+            flash("E-mail já cadastrado.", "danger")
             return redirect(url_for("cadastro"))
 
         new_user = {
@@ -113,22 +102,16 @@ def cadastro():
             "nome": nome,
             "email": email,
             "telefone": request.form.get("telefone", ""),
-            "senha": generate_password_hash(senha),
+            "senha": generate_password_hash(request.form.get("senha", "123456")),
             "role": "user",
             "data_cadastro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Tornar Admin se for o e-mail do Jhony ou se for o primeiro usuário
         if email == "jhonybrandoborges@gmail.com" or not users:
             new_user["role"] = "admin"
 
         save_user(new_user)
-        session.update({
-            "user_id": new_user["id"], 
-            "user_nome": new_user["nome"], 
-            "role": new_user["role"]
-        })
-        flash(f"Bem-vindo, {new_user['nome']}!", "success")
+        session.update({"user_id": new_user["id"], "user_nome": new_user["nome"], "role": new_user["role"]})
         return redirect(url_for("campeonatos"))
     return render_template("cadastro.html")
 
@@ -136,16 +119,9 @@ def cadastro():
 def login():
     if request.method == "POST":
         email = request.form.get("email", "").lower().strip()
-        senha = request.form.get("senha", "")
-        
         user = next((u for u in get_users() if u.get("email") == email), None)
-        if user and check_password_hash(user.get("senha", ""), senha):
-            session.update({
-                "user_id": user["id"], 
-                "user_nome": user["nome"], 
-                "role": user.get("role", "user")
-            })
-            flash(f"Olá, {user['nome']}!", "success")
+        if user and check_password_hash(user.get("senha", ""), request.form.get("senha", "")):
+            session.update({"user_id": user["id"], "user_nome": user["nome"], "role": user.get("role", "user")})
             return redirect(url_for("campeonatos"))
         flash("E-mail ou senha incorretos.", "danger")
     return render_template("login.html")
@@ -153,7 +129,6 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Você saiu do sistema.", "info")
     return redirect(url_for("index"))
 
 @app.route("/campeonatos")
@@ -173,16 +148,14 @@ def perfil():
             user["senha"] = generate_password_hash(request.form.get("nova_senha"))
         save_user(user)
         session["user_nome"] = user["nome"]
-        flash("Perfil atualizado com sucesso!", "success")
+        flash("Perfil atualizado!", "success")
     return render_template("perfil.html", user=user)
 
 @app.route("/campeonato/<id>")
 @login_required
 def detalhe_campeonato(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
-    if not camp: 
-        flash("Campeonato não encontrado.", "warning")
-        return redirect(url_for("campeonatos"))
+    if not camp: return redirect(url_for("campeonatos"))
     
     users_dict = {u["id"]: u["nome"] for u in get_users()}
     inscritos_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("inscritos", [])]
@@ -229,7 +202,7 @@ def cancelar_inscricao(id):
         if camp.get("lista_espera"):
             promovido = camp["lista_espera"].pop(0)
             camp["inscritos"].append(promovido)
-        flash("Inscrição cancelada com sucesso.", "info")
+        flash("Inscrição cancelada.", "info")
     elif u_id in camp.get("lista_espera", []):
         camp["lista_espera"].remove(u_id)
         flash("Removido da lista de espera.", "info")
@@ -237,7 +210,7 @@ def cancelar_inscricao(id):
     save_camp(camp)
     return redirect(url_for("detalhe_campeonato", id=id))
 
-# --- ROTAS ADMIN ---
+# --- ADMIN ---
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
@@ -255,17 +228,17 @@ def admin_promover(id):
     if user:
         user["role"] = "admin"
         save_user(user)
-        flash(f"{user['nome']} agora é Administrador!", "success")
+        flash(f"{user['nome']} agora é Admin!", "success")
     return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/usuarios/excluir/<id>")
 @admin_required
 def admin_excluir_usuario(id):
     if id == session["user_id"]:
-        flash("Você não pode excluir sua própria conta.", "danger")
+        flash("Não pode excluir a si mesmo.", "danger")
     elif DB_CONNECTED:
         db.users.delete_one({"id": id})
-        flash("Usuário removido do sistema.", "info")
+        flash("Usuário excluído.", "info")
     return redirect(url_for("admin_usuarios"))
 
 @app.route("/admin/campeonatos/novo", methods=["GET", "POST"])
@@ -284,7 +257,7 @@ def admin_novo_camp():
             "inscritos": [], "lista_espera": []
         }
         save_camp(new_camp)
-        flash("Novo campeonato criado com sucesso!", "success")
+        flash("Campeonato criado!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form_campeonato.html", camp=None)
 
@@ -295,10 +268,8 @@ def admin_editar_camp(id):
     if not camp: return redirect(url_for("admin_dashboard"))
     
     if request.method == "POST":
-        try:
-            new_max = int(request.form.get("max_participantes", 12))
-        except:
-            new_max = 12
+        try: new_max = int(request.form.get("max_participantes", 12))
+        except: new_max = 12
             
         camp.update({
             "nome": request.form.get("nome", camp["nome"]),
@@ -318,7 +289,7 @@ def admin_editar_camp(id):
             camp["inscritos"].append(promovido)
             
         save_camp(camp)
-        flash("Campeonato atualizado e lista de espera processada!", "success")
+        flash("Campeonato atualizado!", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form_campeonato.html", camp=camp)
 
@@ -327,8 +298,8 @@ def admin_editar_camp(id):
 def admin_excluir_camp(id):
     if DB_CONNECTED:
         db.campeonatos.delete_one({"id": id})
-        flash("Campeonato removido.", "info")
+        flash("Campeonato excluído.", "info")
     return redirect(url_for("admin_dashboard"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

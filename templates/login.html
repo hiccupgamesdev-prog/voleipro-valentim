@@ -3,10 +3,10 @@
 
 {% block content %}
 <div class="auth-container">
-  <div class="glass-card" style="text-align: center;">
+  <div class="glass-card" style="text-align: center; max-width: 500px; width: 100%;">
     <div style="font-size: 3rem; margin-bottom: 1rem;">🏐</div>
-    <h2 style="margin-bottom: 0.5rem;">Bem-vindo de volta</h2>
-    <p style="color: var(--text-muted); margin-bottom: 2.5rem;">Acesse sua conta para ver os campeonatos</p>
+    <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 800;">Bem-vindo de volta</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1rem;">Acesse sua conta para ver os campeonatos</p>
 
     <form method="POST">
       <div class="form-group" style="text-align: left;">
@@ -22,13 +22,13 @@
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Entrar no Sistema</button>
     </form>
 
-    <p style="margin-top: 2rem; color: var(--text-muted);">
+    <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.95rem;">
       Ainda não tem conta? <a href="{{ url_for('cadastro') }}" style="color: var(--primary); font-weight: 700; text-decoration: none;">Cadastrar</a>
     </p>
     
     <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
       <p style="font-size: 0.8rem; color: var(--text-muted);">Acesso Admin Teste:</p>
-      <code style="font-size: 0.8rem; color: var(--primary);">admin@volei.com / admin123</code>
+      <code style="font-size: 0.8rem; color: var(--primary); background: rgba(0,255,163,0.1); padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; margin-top: 0.5rem;">admin@volei.com / admin123</code>
     </div>
   </div>
 </div>

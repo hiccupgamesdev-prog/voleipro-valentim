@@ -12,14 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuração de caminhos dinâmicos para a Vercel
-# Isso garante que o Flask sempre encontre as pastas, não importa onde a Vercel as coloque
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-template_dir = os.path.join(BASE_DIR, 'templates')
-static_dir = os.path.join(BASE_DIR, 'static')
 
 app = Flask(__name__, 
-            template_folder=template_dir, 
-            static_folder=static_dir,
+            template_folder='templates', 
+            static_folder='static',
             static_url_path='/static')
 app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-v11-final")
 
@@ -94,7 +91,7 @@ def admin_required(f):
 # --- SERVIR ARQUIVOS ESTÁTICOS ---
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    return send_from_directory(static_dir, filename)
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), filename)
 
 # --- ROTAS ---
 @app.route("/")

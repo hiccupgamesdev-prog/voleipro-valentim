@@ -109,11 +109,31 @@
       }
       .nav-links.active { display: flex; }
       .nav-user-profile { width: 100%; justify-content: space-between; padding: 15px 20px; }
-      .main-content { padding-top: 120px; padding-left: 1rem; padding-right: 1rem; } 
-      .auth-container { min-height: auto; padding: 100px 1rem 2rem; } 
-      .glass-card { padding: 2rem; }
-      .grid { grid-template-columns: 1fr; gap: 1.5rem; }
-      .section-title h2, .section-title h1 { font-size: 2rem; }
+      
+      /* Design Mobile Premium Global */
+      .main-content { padding: 100px 12px 60px !important; } 
+      .section-padding { padding: 40px 12px !important; }
+      .auth-container { min-height: auto; padding: 100px 12px 2rem; } 
+      
+      .glass-card { 
+        padding: 2rem 1.5rem !important; 
+        border-radius: 24px !important;
+      }
+      
+      .grid { 
+        grid-template-columns: 1fr !important; 
+        gap: 1.2rem !important; 
+      }
+      
+      .section-title h2, .section-title h1 { 
+        font-size: 1.8rem !important; 
+        line-height: 1.2;
+      }
+      
+      .btn {
+        width: 100%; /* Botões ocupam largura total no mobile para facilitar o toque */
+        padding: 1rem !important;
+      }
     }
   </style>
 </head>

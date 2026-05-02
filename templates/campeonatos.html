@@ -17,10 +17,18 @@
                 
                 <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem;">{{ camp.nome }}</h3>
                 
-                <div style="color: var(--text-muted); margin-bottom: 2rem;">
-                    <p style="margin-bottom: 8px;"><i class="fas fa-clock" style="width: 20px; color: var(--primary);"></i> {{ camp.hora_evento }}</p>
-                    <p style="margin-bottom: 8px;"><i class="fas fa-map-marker-alt" style="width: 20px; color: var(--primary);"></i> {{ camp.local }}</p>
-                    <p><i class="fas fa-users" style="width: 20px; color: var(--primary);"></i> {{ camp.inscritos | length if camp.inscritos else 0 }} / {{ camp.max_participantes }} Inscritos</p>
+                <div style="color: var(--text-muted); margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="grid-column: 1 / -1;">
+                        <p style="margin-bottom: 8px;"><i class="fas fa-map-marker-alt" style="width: 20px; color: var(--primary);"></i> {{ camp.local }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); font-weight: 700; text-transform: uppercase;">Hora</p>
+                        <p style="color: #fff; font-weight: 600;">{{ camp.hora_evento }}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); font-weight: 700; text-transform: uppercase;">Vagas</p>
+                        <p style="color: #fff; font-weight: 600;">{{ camp.inscritos | length if camp.inscritos else 0 }} / {{ camp.max_participantes }}</p>
+                    </div>
                 </div>
 
                 <div class="progress-container" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; margin-bottom: 2rem; overflow: hidden;">

@@ -1,7 +1,6 @@
 import os
 import uuid
 import logging
-import json
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
@@ -12,20 +11,17 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Configuração de caminhos dinâmicos
+# Configuração de caminhos dinâmicos para a Vercel
+# Isso garante que o Flask sempre encontre as pastas, não importa onde a Vercel as coloque
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_dir = os.path.join(BASE_DIR, 'templates')
 static_dir = os.path.join(BASE_DIR, 'static')
-data_dir = os.path.join(BASE_DIR, 'data')
-
-if not os.path.exists(data_dir):
-    os.makedirs(data_dir)
 
 app = Flask(__name__, 
             template_folder=template_dir, 
             static_folder=static_dir,
             static_url_path='/static')
-app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-v12-final")
+app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-v11-final")
 
 # --- BANCO DE DADOS ---
 MONGO_URI = os.environ.get("MONGO_URI")
@@ -45,69 +41,37 @@ if MONGO_URI:
 def inject_globals():
     return dict(db_status=DB_CONNECTED)
 
-# --- FUNÇÕES DE APOIO COM FALLBACK ---
+# --- FUNÇÕES DE APOIO ---
 def get_users():
-    if DB_CONNECTED:
-        try: return list(db.users.find())
-        except: pass
-    
-    # Fallback local
-    try:
-        path = os.path.join(data_dir, 'users.json')
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-    except: pass
-    return []
+    try: return list(db.users.find()) if DB_CONNECTED else []
+    except: return []
 
 def save_user(user_data):
     if DB_CONNECTED:
-        try: 
-            db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
-            return
+        try: db.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
         except: pass
-    
-    # Fallback local
-    try:
-        path = os.path.join(data_dir, 'users.json')
-        users = get_users()
-        users = [u for u in users if u.get("id") != user_data.get("id")]
-        users.append(user_data)
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(users, f, indent=2, ensure_ascii=False)
-    except: pass
 
 def get_camps():
     if DB_CONNECTED:
         try: return list(db.campeonatos.find().sort("data_evento", 1))
         except: pass
     
-    # Fallback local
+    # Fallback para dados locais
     try:
-        path = os.path.join(data_dir, 'campeonatos.json')
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
+        import json
+        data_file = os.path.join(BASE_DIR, 'data', 'campeonatos.json')
+        if os.path.exists(data_file):
+            with open(data_file, 'r', encoding='utf-8') as f:
                 camps = json.load(f)
                 return sorted(camps, key=lambda x: x.get("data_evento", ""))
-    except: pass
+    except:
+        pass
     return []
 
 def save_camp(camp_data):
     if DB_CONNECTED:
-        try: 
-            db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
-            return
+        try: db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
         except: pass
-    
-    # Fallback local
-    try:
-        path = os.path.join(data_dir, 'campeonatos.json')
-        camps = get_camps()
-        camps = [c for c in camps if c.get("id") != camp_data.get("id")]
-        camps.append(camp_data)
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(camps, f, indent=2, ensure_ascii=False)
-    except: pass
 
 # --- PROTEÇÃO ---
 def login_required(f):
@@ -127,12 +91,16 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# --- SERVIR ARQUIVOS ESTÁTICOS ---
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(static_dir, filename)
+
 # --- ROTAS ---
 @app.route("/")
 def index():
     all_camps = get_camps()
     today = datetime.now().strftime("%Y-%m-%d")
-    # Filtrar campeonatos que ainda não aconteceram
     ativos = [c for c in all_camps if c.get("data_evento", "") >= today]
     return render_template("index.html", campeonatos=ativos[:3])
 
@@ -321,12 +289,11 @@ def admin_editar_camp(id):
     if not camp: return redirect(url_for("admin_dashboard"))
     
     if request.method == "POST":
-        try: 
-            new_max = int(request.form.get("max_participantes", 12))
-            old_max = int(camp.get("max_participantes", 12))
-        except: 
-            new_max = 12
-            old_max = 12
+        try: new_max = int(request.form.get("max_participantes", 12))
+        except: new_max = 12
+        
+        try: old_max = int(camp.get("max_participantes", 12))
+        except: old_max = 12
             
         camp.update({
             "nome": request.form.get("nome", camp["nome"]),
@@ -341,14 +308,13 @@ def admin_editar_camp(id):
         if "inscritos" not in camp: camp["inscritos"] = []
         if "lista_espera" not in camp: camp["lista_espera"] = []
         
-        # Lógica de Fila de Espera ao Alterar Vagas
+        # Se aumentou as vagas, promover pessoas da fila de espera
         if new_max > old_max:
-            # Aumentou vagas: promover da fila de espera
             while len(camp["inscritos"]) < new_max and camp["lista_espera"]:
                 promovido = camp["lista_espera"].pop(0)
                 camp["inscritos"].append(promovido)
+        # Se diminuiu as vagas, mover inscritos extras para fila de espera
         elif new_max < old_max:
-            # Diminuiu vagas: mover últimos inscritos para o início da fila de espera
             while len(camp["inscritos"]) > new_max:
                 removido = camp["inscritos"].pop()
                 camp["lista_espera"].insert(0, removido)

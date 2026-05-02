@@ -1,19 +1,17 @@
-# Não ignorar a pasta static
 !static/
 !static/**/*
-
-# Ignorar arquivos desnecessários
+!data/
+!data/**/*
+!templates/
+!templates/**/*
 .git
 .gitignore
 *.pyc
 __pycache__
-.env
+*.env
 .env.local
-.env.*.local
-.pytest_cache
-.coverage
-*.egg-info
-dist
-build
+venv/
+node_modules/
+.vercel
 .DS_Store
 *.md

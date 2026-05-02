@@ -1,52 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero" style="text-align: center; padding: 40px 0 80px; position: relative; z-index: 10;">
+<section class="hero" style="text-align: center; padding: 60px 0 100px;">
     <div data-aos="zoom-in">
         <div class="hero-logo-container" style="margin-bottom: 40px;">
-            <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" style="width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 40px var(--primary-glow); object-fit: cover;">
+            <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" style="width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 40px var(--primary-glow);">
         </div>
-        <h1 style="font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 25px; letter-spacing: -2px;">A sua jornada no <span style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Vôlei</span> começa aqui.</h1>
-        <p style="font-size: 1.3rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 45px; font-weight: 500;">Inscreva-se em campeonatos, acompanhe seus resultados e suba no ranking da nossa região.</p>
+        <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 25px;">A sua jornada no <span>Vôlei</span> começa aqui.</h1>
+        <p style="font-size: 1.3rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 45px;">Inscreva-se em campeonatos, acompanhe seus resultados e suba no ranking da nossa região.</p>
         
-        <div style="display: flex; gap: 20px; justify-content: center;">
-            {% if not session.get('user_id') %}
-                <a href="{{ url_for('cadastro') }}" class="btn btn-primary" style="padding: 1.2rem 3rem;">Criar Conta Agora</a>
-                <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 1.2rem 3rem;">Ver Campeonatos</a>
-            {% else %}
-                <a href="{{ url_for('campeonatos') }}" class="btn btn-primary" style="padding: 1.2rem 3rem;">Ver Todos os Campeonatos</a>
-            {% endif %}
-        </div>
+        {% if not session.get('user_id') %}
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <a href="{{ url_for('cadastro') }}" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1rem;">Criar Conta Agora</a>
+                <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">Ver Campeonatos</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('campeonatos') }}" class="btn btn-primary">Ver Todos os Campeonatos</a>
+        {% endif %}
     </div>
 </section>
 
-<section class="active-camps" style="padding-top: 60px; position: relative; z-index: 10;">
-    <div class="section-title" data-aos="fade-up" style="text-align: center; margin-bottom: 4rem;">
-        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 15px;">Campeonatos <span style="color: var(--primary);">Ativos</span></h2>
-        <p style="color: var(--text-muted); font-size: 1.1rem;">Entre em quadra agora mesmo!</p>
+<section class="active-camps" style="padding-top: 40px;">
+    <div class="section-title" data-aos="fade-up">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Campeonatos <span>Ativos</span></h2>
+        <p style="color: var(--text-muted);">Entre em quadra agora mesmo!</p>
     </div>
 
     <div class="grid">
         {% for camp in campeonatos %}
             <div class="glass-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
-                    <span class="badge" style="background: rgba(0, 255, 163, 0.1); color: var(--primary); padding: 6px 15px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">{{ camp.categoria }}</span>
-                    <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;"><i class="fas fa-users" style="margin-right: 5px;"></i> {{ camp.inscritos|length }}/{{ camp.max_participantes }}</span>
+                <span class="badge" style="background: rgba(0, 255, 163, 0.1); color: var(--primary);">{{ camp.categoria }}</span>
+                <h3 style="font-size: 1.8rem; margin-bottom: 15px;">{{ camp.nome }}</h3>
+                <div style="color: var(--text-muted); margin-bottom: 25px;">
+                    <p style="margin-bottom: 8px;"><i class="fas fa-calendar-alt" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.data_evento }}</p>
+                    <p><i class="fas fa-map-marker-alt" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.local }}</p>
                 </div>
-                <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2;">{{ camp.nome }}</h3>
-                <div style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem;">
-                    <p style="margin-bottom: 10px;"><i class="fas fa-calendar-alt" style="margin-right: 12px; color: var(--primary); width: 15px;"></i> {{ camp.data_evento }} às {{ camp.hora_evento }}</p>
-                    <p><i class="fas fa-map-marker-alt" style="margin-right: 12px; color: var(--primary); width: 15px;"></i> {{ camp.local }}</p>
-                </div>
-                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%;">Ver Detalhes</a>
+                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem;">Ver Detalhes</a>
             </div>
         {% else %}
-            <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 6rem 2rem; border-style: dashed; border-width: 2px;">
-                <div style="width: 80px; height: 80px; background: rgba(0, 255, 163, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                    <i class="fas fa-volleyball-ball" style="font-size: 2.5rem; color: var(--primary);"></i>
-                </div>
-                <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;">Nenhum campeonato no momento</h3>
-                <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto;">Fique atento, novas competições surgirão em breve! Estamos preparando os próximos torneios para você.</p>
+            <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 5rem;">
+                <i class="fas fa-volleyball-ball fa-spin" style="font-size: 4rem; color: var(--primary); margin-bottom: 2rem;"></i>
+                <h3>Nenhum campeonato no momento</h3>
+                <p style="color: var(--text-muted);">Fique atento, novas competições surgirão em breve!</p>
             </div>
         {% endfor %}
     </div>

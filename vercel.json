@@ -15,6 +15,10 @@
       }
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/static/img/logo_hiccup.png"
+    },
+    {
       "src": "/(.*)",
       "dest": "app.py"
     }

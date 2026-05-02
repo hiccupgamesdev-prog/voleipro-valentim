@@ -2,98 +2,145 @@
 {% block title %}{{ camp.nome }} - Detalhes{% endblock %}
 
 {% block content %}
-<div class="section-padding" style="margin-top: 100px;">
+<div class="section-padding" style="padding-top: 20px;">
     <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;" data-aos="fade-right">
-        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 0.7rem 1.5rem; font-size: 0.9rem;">← Voltar</a>
-        <h1 style="margin: 0;">Detalhes do <span>Campeonato</span></h1>
+        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 0.7rem 1.5rem; font-size: 0.9rem; border-radius: 12px;">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+        <h1 style="margin: 0; font-size: 2.5rem; font-weight: 800;">Detalhes do <span style="color: var(--primary);">Campeonato</span></h1>
     </div>
 
-    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 30px;">
+    <div class="grid" style="grid-template-columns: 1.8fr 1.2fr; gap: 30px; align-items: start;">
         <!-- INFO DO CAMPEONATO -->
         <div data-aos="fade-up">
-            <div class="glass-card" style="margin-bottom: 30px;">
-                <h2 style="color: var(--primary); margin-bottom: 1.5rem;">{{ camp.nome }}</h2>
+            <div class="glass-card" style="margin-bottom: 30px; padding: 3rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="color: var(--primary); font-size: 2.2rem; font-weight: 800; margin: 0;">{{ camp.nome }}</h2>
+                    <span class="badge" style="background: var(--gradient); color: #000; padding: 8px 20px; font-weight: 800;">{{ camp.categoria }}</span>
+                </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 3rem; background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 20px; border: 1px solid var(--glass-border);">
                     <div>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">📅 Data e Hora</p>
-                        <p style="font-weight: 600;">{{ camp.data_evento }} às {{ camp.hora_evento }}</p>
+                        <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px;">📅 Data e Hora</p>
+                        <p style="font-weight: 700; font-size: 1.1rem;">{{ camp.data_evento }} às {{ camp.hora_evento }}</p>
                     </div>
                     <div>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">📍 Local</p>
-                        <p style="font-weight: 600;">{{ camp.local }}</p>
+                        <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px;">📍 Local</p>
+                        <p style="font-weight: 700; font-size: 1.1rem;">{{ camp.local }}</p>
                     </div>
                     <div>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">🏐 Categoria</p>
-                        <p style="font-weight: 600;">{{ camp.categoria }}</p>
+                        <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px;">👥 Vagas Totais</p>
+                        <p style="font-weight: 700; font-size: 1.1rem;">{{ camp.max_participantes }} Atletas</p>
                     </div>
                     <div>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">👥 Vagas</p>
-                        <p style="font-weight: 600;">{{ camp.inscritos|length }} / {{ camp.max_participantes }}</p>
+                        <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px;">📊 Status</p>
+                        <p style="font-weight: 700; font-size: 1.1rem; color: var(--primary);">{{ camp.inscritos|length }} Confirmados</p>
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 1rem;">Regras e Informações</h3>
-                <div style="color: var(--text-muted); line-height: 1.6; white-space: pre-line;">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-info-circle" style="color: var(--primary);"></i> Regras e Informações
+                </h3>
+                <div style="color: var(--text-muted); line-height: 1.8; white-space: pre-line; font-size: 1.05rem; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 15px;">
                     {{ camp.regras }}
                 </div>
             </div>
 
-            <!-- LISTA DE INSCRITOS -->
-            <div class="glass-card">
-                <h3 style="margin-bottom: 1.5rem;">Atletas <span>Confirmados</span></h3>
+            <!-- LISTA DE ATLETAS -->
+            <div class="glass-card" style="padding: 3rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0;">Atletas <span style="color: var(--primary);">Confirmados</span></h3>
+                    <span style="background: rgba(0, 255, 163, 0.1); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem;">{{ inscritos_nomes|length }} Inscritos</span>
+                </div>
+                
                 {% if inscritos_nomes %}
-                <ul style="list-style: none; padding: 0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     {% for nome in inscritos_nomes %}
-                    <li style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
-                        <span style="color: var(--primary);">●</span> {{ nome }}
-                    </li>
+                    <div style="padding: 15px 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; gap: 15px; transition: 0.3s;">
+                        <div style="width: 35px; height: 35px; background: var(--gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 0.8rem;">{{ nome[0]|upper }}</div>
+                        <span style="font-weight: 600;">{{ nome }}</span>
+                    </div>
                     {% endfor %}
-                </ul>
+                </div>
                 {% else %}
-                <p style="color: var(--text-muted);">Nenhum atleta confirmado ainda.</p>
+                <div style="text-align: center; padding: 3rem; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--glass-border);">
+                    <p style="color: var(--text-muted);">Nenhum atleta confirmado ainda. Seja o primeiro!</p>
+                </div>
                 {% endif %}
 
                 {% if espera_nomes %}
-                <h3 style="margin: 2rem 0 1.5rem;">Lista de <span>Espera</span></h3>
-                <ul style="list-style: none; padding: 0;">
-                    {% for nome in espera_nomes %}
-                    <li style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; opacity: 0.7;">
-                        <span style="color: #ffb800;">●</span> {{ nome }} <small style="margin-left: auto;">({{ loop.index }}º na fila)</small>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <div style="margin-top: 4rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0;">Lista de <span style="color: #ffb800;">Espera</span></h3>
+                        <span style="background: rgba(255, 184, 0, 0.1); color: #ffb800; padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem;">{{ espera_nomes|length }} na fila</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        {% for nome in espera_nomes %}
+                        <div style="padding: 15px 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 184, 0, 0.1); border-radius: 12px; display: flex; align-items: center; gap: 15px; opacity: 0.8;">
+                            <div style="width: 35px; height: 35px; background: #ffb800; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 0.8rem;">{{ loop.index }}</div>
+                            <span style="font-weight: 600;">{{ nome }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- AÇÕES -->
-        <div data-aos="fade-left">
-            <div class="glass-card" style="position: sticky; top: 120px; text-align: center; border-color: var(--primary);">
+        <!-- CARD DE AÇÃO (STICKY) -->
+        <div style="position: sticky; top: 120px;">
+            <div class="glass-card" style="text-align: center; border-color: var(--primary); padding: 3rem;">
                 {% if inscrito %}
-                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                    <h3>Você está <span>Confirmado!</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Prepare o uniforme e nos vemos em quadra.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: #ff4b4b; padding: 0.9rem 2rem;">Cancelar Minha Inscrição</a>
+                    <div style="width: 80px; height: 80px; background: rgba(0, 255, 163, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--primary);"></i>
+                    </div>
+                    <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;">Inscrição <span style="color: var(--primary);">Confirmada!</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6;">Você já garantiu sua vaga. Prepare o uniforme e nos vemos em quadra!</p>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: rgba(255, 75, 75, 0.3); background: rgba(255, 75, 75, 0.05);">
+                        <i class="fas fa-times-circle"></i> Cancelar Inscrição
+                    </a>
                 {% elif espera %}
-                    <div style="color: #ffb800; font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                    <h3>Você está na <span>Espera</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Se alguém desistir, você será promovido automaticamente.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: #ffb800; padding: 0.9rem 2rem;">Sair da Fila</a>
+                    <div style="width: 80px; height: 80px; background: rgba(255, 184, 0, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                        <i class="fas fa-clock" style="font-size: 3rem; color: #ffb800;"></i>
+                    </div>
+                    <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;">Você está na <span style="color: #ffb800;">Espera</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6;">As vagas principais acabaram, mas você é o próximo da fila se alguém desistir.</p>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: rgba(255, 184, 0, 0.3); background: rgba(255, 184, 0, 0.05);">
+                        <i class="fas fa-door-open"></i> Sair da Fila
+                    </a>
                 {% else %}
-                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">🏐</div>
-                    <h3>Vagas <span>Disponíveis</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Garanta seu lugar antes que as vagas acabem.</p>
-                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem;">Quero Participar</a>
+                    <div style="width: 80px; height: 80px; background: rgba(0, 255, 163, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                        <i class="fas fa-volleyball-ball" style="font-size: 3rem; color: var(--primary);"></i>
+                    </div>
+                    <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;">Vagas <span style="color: var(--primary);">Abertas!</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6;">Não perca tempo e garanta seu lugar neste campeonato agora mesmo.</p>
+                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1.2rem;">
+                        <i class="fas fa-user-plus"></i> Quero Participar
+                    </a>
                 {% endif %}
                 
                 {% if session.role == 'admin' %}
-                <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Acesso Administrativo</p>
-                <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem; padding: 0.8rem 1.5rem;" onclick="return confirm('Excluir este campeonato?')">Excluir Campeonato</a>
+                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 1.5rem;">Painel do Administrador</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="{{ url_for('admin_editar_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.85rem; border-color: var(--secondary); color: var(--secondary);">
+                            <i class="fas fa-edit"></i> Editar Campeonato
+                        </a>
+                        <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.85rem; border-color: #ff4b4b; color: #ff4b4b;" onclick="return confirm('Tem certeza que deseja excluir este campeonato permanentemente?')">
+                            <i class="fas fa-trash"></i> Excluir Campeonato
+                        </a>
+                    </div>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    @media (max-width: 1024px) {
+        .grid { grid-template-columns: 1fr !important; }
+        div[style*="position: sticky"] { position: static !important; }
+    }
+</style>
 {% endblock %}

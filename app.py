@@ -247,10 +247,11 @@ def cancelar_inscricao(id):
     user_id = session["user_id"]
     if user_id in camp.get("inscritos", []):
         camp["inscritos"].remove(user_id)
-        # Promover primeiro da espera
-        if camp.get("lista_espera"):
+        # Promover primeiro da espera se houver alguém
+        if camp.get("lista_espera") and len(camp["lista_espera"]) > 0:
             proximo = camp["lista_espera"].pop(0)
-            camp["inscritos"].append(proximo)
+            if proximo not in camp["inscritos"]:
+                camp["inscritos"].append(proximo)
     elif user_id in camp.get("lista_espera", []):
         camp["lista_espera"].remove(user_id)
         

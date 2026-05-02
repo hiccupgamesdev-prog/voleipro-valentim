@@ -1,16 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Build complete'",
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "python3.11",
-        "includeFiles": "static/**",
-        "excludeFiles": "*.pyc"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -23,17 +16,10 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/app.py"
+      "dest": "app.py"
     }
   ],
   "env": {
-    "FLASK_ENV": "production",
-    "PYTHONUNBUFFERED": "1"
-  },
-  "functions": {
-    "app.py": {
-      "maxDuration": 30,
-      "memory": 2048
-    }
+    "FLASK_ENV": "production"
   }
 }

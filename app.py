@@ -17,7 +17,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_dir = os.path.join(BASE_DIR, 'templates')
 static_dir = os.path.join(BASE_DIR, 'static')
 
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app = Flask(__name__, 
+            template_folder=template_dir, 
+            static_folder=static_dir,
+            static_url_path='/static')
 app.secret_key = os.environ.get("SECRET_KEY", "voleipro-secret-key-v11-final")
 
 # --- BANCO DE DADOS ---

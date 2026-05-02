@@ -126,13 +126,21 @@ def serve_static(filename):
 @app.route("/")
 def index():
     all_camps = get_camps()
+    all_users = get_users()
     today = datetime.now().strftime("%Y-%m-%d")
     
     # Tenta filtrar ativos, mas se não houver nenhum, mostra os próximos 3 independente da data
     ativos = [c for c in all_camps if c.get("data_evento", "") >= today]
     
     display_camps = ativos if ativos else all_camps
-    return render_template("index.html", campeonatos=display_camps[:3])
+    
+    stats = {
+        "users_count": len(all_users),
+        "camps_count": len(all_camps),
+        "active_camps": len(ativos)
+    }
+    
+    return render_template("index.html", campeonatos=display_camps[:3], stats=stats)
 
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
@@ -175,7 +183,7 @@ def login():
             session["user_id"] = user["id"]
             session["user_nome"] = user["nome"]
             session["role"] = user["role"]
-            return redirect(url_for("index"))
+            return redirect(url_for("campeonatos"))
         
         flash("E-mail ou senha incorretos.", "danger")
     return render_template("login.html")
@@ -198,6 +206,20 @@ def detalhe_campeonato(id):
     espera_nomes = []
     
     users = get_users()
+    user_ids_existentes = {u["id"] for u in users}
+    
+    # Limpeza de segurança: remove IDs de usuários que não existem mais no banco
+    camp["inscritos"] = [uid for uid in camp.get("inscritos", []) if uid in user_ids_existentes]
+    camp["lista_espera"] = [uid for uid in camp.get("lista_espera", []) if uid in user_ids_existentes]
+    
+    # Se abriu vaga devido à limpeza, promove da espera
+    max_p = int(camp.get("max_participantes", 12))
+    while len(camp["inscritos"]) < max_p and camp["lista_espera"]:
+        proximo = camp["lista_espera"].pop(0)
+        camp["inscritos"].append(proximo)
+    
+    save_camp(camp) # Salva a limpeza realizada
+
     for uid in camp.get("inscritos", []):
         u = next((usr for usr in users if usr["id"] == uid), None)
         if u: inscritos_nomes.append(u.get("nome", "Atleta Desconhecido"))

@@ -1,75 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero" style="text-align: center; padding: 120px 0 150px;">
-    <div data-aos="zoom-in">
+<section class="hero" style="text-align: center; padding: 100px 0 120px; position: relative;">
+    <!-- Elementos Animados de Vôlei -->
+    <i class="fas fa-volleyball-ball floating-ball" style="top: 10%; left: 10%; animation-delay: 0s;"></i>
+    <i class="fas fa-volleyball-ball floating-ball" style="top: 60%; left: 85%; animation-delay: -5s; font-size: 3rem;"></i>
+    <i class="fas fa-volleyball-ball floating-ball" style="top: 80%; left: 20%; animation-delay: -10s; font-size: 1.5rem;"></i>
+
+    <div data-aos="zoom-in" style="position: relative; z-index: 1;">
         <div class="hero-logo-container" style="margin-bottom: 40px;">
-            <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" style="width: 150px; height: 150px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 40px var(--primary-glow);">
+            <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" style="width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--primary); box-shadow: 0 0 40px var(--primary-glow);">
         </div>
-        <h1 style="font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 25px; text-transform: uppercase; letter-spacing: -2px;">Domine a <span style="color: var(--primary);">Quadra</span>.</h1>
-        <p style="font-size: 1.4rem; color: var(--text-muted); max-width: 800px; margin: 0 auto 45px; font-weight: 500;">O ecossistema completo para atletas de vôlei. Inscreva-se em campeonatos, acompanhe sua evolução e conecte-se com a elite do esporte.</p>
+        <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 25px; text-transform: uppercase; letter-spacing: -1px;">VôleiPro <span>Valentim</span></h1>
+        <p style="font-size: 1.3rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 45px;">A plataforma oficial para inscrições em campeonatos de vôlei da nossa região. Simples, rápido e eficiente.</p>
         
         <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
             {% if not session.get('user_id') %}
-                <a href="{{ url_for('cadastro') }}" class="btn btn-primary" style="padding: 1.2rem 3rem; font-size: 1.1rem; text-transform: uppercase;">Começar Agora</a>
-                <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 1.2rem 3rem; font-size: 1.1rem; text-transform: uppercase;">Ver Eventos</a>
+                <a href="{{ url_for('cadastro') }}" class="btn btn-primary" style="padding: 1.1rem 2.5rem; font-size: 1rem; text-transform: uppercase;">Criar Minha Conta</a>
+                <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 1.1rem 2.5rem; font-size: 1rem; text-transform: uppercase;">Ver Campeonatos</a>
             {% else %}
-                <a href="{{ url_for('campeonatos') }}" class="btn btn-primary" style="padding: 1.2rem 3rem; font-size: 1.1rem; text-transform: uppercase;">Explorar Campeonatos</a>
+                <a href="{{ url_for('campeonatos') }}" class="btn btn-primary" style="padding: 1.1rem 2.5rem; font-size: 1rem; text-transform: uppercase;">Ir para Campeonatos</a>
+                <a href="{{ url_for('perfil') }}" class="btn btn-outline" style="padding: 1.1rem 2.5rem; font-size: 1rem; text-transform: uppercase;">Meu Perfil</a>
             {% endif %}
         </div>
     </div>
 </section>
 
-<!-- SEÇÃO DE ESTATÍSTICAS (Inspirada no Mestres.app) -->
+<!-- SEÇÃO DE ESTATÍSTICAS REAIS -->
 <div class="stats-section" data-aos="fade-up">
     <div class="stat-item">
-        <h3>+500</h3>
-        <p>Atletas Ativos</p>
+        <h3>{{ stats.users_count }}</h3>
+        <p>Atletas Cadastrados</p>
     </div>
     <div class="stat-item">
-        <h3>24/7</h3>
-        <p>Suporte ao Atleta</p>
+        <h3>{{ stats.camps_count }}</h3>
+        <p>Total de Eventos</p>
     </div>
     <div class="stat-item">
-        <h3>100%</h3>
-        <p>Foco em Performance</p>
-    </div>
-    <div class="stat-item">
-        <h3>+50</h3>
-        <p>Eventos Realizados</p>
+        <h3>{{ stats.active_camps }}</h3>
+        <p>Campeonatos Ativos</p>
     </div>
 </div>
 
-<!-- SEÇÃO DE DIFERENCIAIS -->
-<section style="padding: 80px 0;">
-    <div class="section-title" data-aos="fade-up" style="text-align: center; margin-bottom: 60px;">
-        <h2 style="font-size: 3rem;">Por que o <span>VôleiPro</span>?</h2>
-        <p style="color: var(--text-muted);">A plataforma definitiva para quem leva o vôlei a sério.</p>
+<!-- SEÇÃO DE DIFERENCIAIS REAIS -->
+<section style="padding: 60px 0;">
+    <div class="section-title" data-aos="fade-up" style="text-align: center; margin-bottom: 50px;">
+        <h2 style="font-size: 2.5rem;">Como <span>Funciona</span>?</h2>
+        <p style="color: var(--text-muted);">Tudo o que você precisa para participar dos jogos.</p>
     </div>
 
     <div class="features-grid">
         <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-            <i class="fas fa-trophy"></i>
-            <h3>Ranking Exclusivo</h3>
-            <p>Suba de nível a cada vitória e torne-se uma lenda na nossa região.</p>
+            <i class="fas fa-user-plus"></i>
+            <h3>Cadastro Único</h3>
+            <p>Crie sua conta uma única vez e use-a para se inscrever em qualquer evento futuro.</p>
         </div>
         <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-            <i class="fas fa-users"></i>
-            <h3>Comunidade Ativa</h3>
-            <p>Conecte-se com outros jogadores e monte seu time dos sonhos.</p>
+            <i class="fas fa-clipboard-list"></i>
+            <h3>Lista de Espera</h3>
+            <p>Vagas esgotadas? Entre na fila e seja promovido automaticamente se alguém desistir.</p>
         </div>
         <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-            <i class="fas fa-bolt"></i>
-            <h3>Inscrição Rápida</h3>
-            <p>Garanta sua vaga em segundos com nosso sistema automatizado.</p>
+            <i class="fas fa-mobile-alt"></i>
+            <h3>Acesso Fácil</h3>
+            <p>Acompanhe o status da sua inscrição e os detalhes do local direto pelo seu celular.</p>
         </div>
     </div>
 </section>
 
-<section class="active-camps" style="padding: 80px 0; border-top: 1px solid var(--glass-border);">
-    <div class="section-title" data-aos="fade-up" style="margin-bottom: 50px;">
-        <h2 style="font-size: 2.8rem; margin-bottom: 10px;">Próximos <span>Desafios</span></h2>
-        <p style="color: var(--text-muted);">Não fique de fora, as vagas esgotam rápido!</p>
+<section class="active-camps" style="padding: 60px 0; border-top: 1px solid var(--glass-border);">
+    <div class="section-title" data-aos="fade-up" style="margin-bottom: 40px;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Próximos <span>Eventos</span></h2>
+        <p style="color: var(--text-muted);">Confira os campeonatos com inscrições abertas.</p>
     </div>
 
     <div class="grid">
@@ -79,31 +81,28 @@
                     <span class="badge" style="background: rgba(0, 255, 163, 0.1); color: var(--primary); border: 1px solid var(--primary-glow);">{{ camp.categoria }}</span>
                     <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="far fa-calendar-alt"></i> {{ camp.data_evento }}</span>
                 </div>
-                <h3 style="font-size: 1.8rem; margin-bottom: 15px; font-weight: 700;">{{ camp.nome }}</h3>
-                <div style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem;">
+                <h3 style="font-size: 1.6rem; margin-bottom: 15px; font-weight: 700;">{{ camp.nome }}</h3>
+                <div style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">
                     <p style="margin-bottom: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.local }}</p>
                     <p><i class="fas fa-users" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.inscritos|length }} / {{ camp.max_participantes }} Inscritos</p>
                 </div>
-                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1rem 2rem; text-transform: uppercase; font-weight: 800;">Ver Detalhes</a>
+                <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem; text-transform: uppercase; font-weight: 800;">Ver Detalhes</a>
             </div>
         {% else %}
-            <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 5rem; border-style: dashed;">
-                <i class="fas fa-volleyball-ball fa-spin" style="font-size: 4rem; color: var(--primary); margin-bottom: 2rem;"></i>
+            <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 4rem; border-style: dashed;">
+                <i class="fas fa-volleyball-ball fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
                 <h3>Nenhum campeonato no momento</h3>
-                <p style="color: var(--text-muted);">Fique atento, novas competições surgirão em breve!</p>
+                <p style="color: var(--text-muted);">Novas competições serão publicadas em breve!</p>
             </div>
         {% endfor %}
     </div>
-    
-    <div style="text-align: center; margin-top: 60px;">
-        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 1rem 3rem;">Ver Todos os Campeonatos</a>
-    </div>
 </section>
 
-<!-- CTA FINAL (Inspirado no Mestres.app) -->
-<section style="padding: 100px 2rem; background: var(--gradient); border-radius: 40px; text-align: center; margin: 80px 0; color: #000;" data-aos="zoom-in">
-    <h2 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px;">PRONTO PARA O PRÓXIMO NÍVEL?</h2>
-    <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 40px; opacity: 0.8;">Junte-se a centenas de atletas e comece sua jornada competitiva hoje mesmo.</p>
-    <a href="{{ url_for('cadastro') }}" class="btn" style="background: #000; color: #fff; padding: 1.2rem 4rem; font-size: 1.1rem; text-transform: uppercase; font-weight: 800;">Criar Minha Conta Grátis</a>
+{% if not session.get('user_id') %}
+<section style="padding: 80px 2rem; background: var(--gradient); border-radius: 30px; text-align: center; margin: 60px 0; color: #000;" data-aos="zoom-in">
+    <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 15px;">FAÇA PARTE DO JOGO</h2>
+    <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 30px; opacity: 0.8;">Crie sua conta agora e garanta sua vaga nos próximos campeonatos.</p>
+    <a href="{{ url_for('cadastro') }}" class="btn" style="background: #000; color: #fff; padding: 1rem 3rem; font-size: 1rem; text-transform: uppercase; font-weight: 800;">Cadastrar Gratuitamente</a>
 </section>
+{% endif %}
 {% endblock %}

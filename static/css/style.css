@@ -66,23 +66,36 @@ body {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.9)), url('/static/img/hero-bg.jpg');
-  background-size: cover;
-  background-position: center;
+  background: var(--bg-dark);
   border-bottom: 1px solid var(--glass-border);
 }
 .stats-section {
-  padding: 80px 2rem;
-  background: linear-gradient(rgba(112, 0, 255, 0.1), rgba(5, 5, 5, 1)), url('/static/img/stats-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  padding: 60px 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 30px;
   text-align: center;
   border-radius: 30px;
   margin: 40px 0;
+}
+/* Animação de Vôlei Flutuante */
+.floating-ball {
+  position: absolute;
+  font-size: 2rem;
+  color: var(--primary);
+  opacity: 0.1;
+  z-index: 0;
+  animation: float-ball 15s infinite linear;
+}
+@keyframes float-ball {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(100px, 50px) rotate(90deg); }
+  50% { transform: translate(50px, 150px) rotate(180deg); }
+  75% { transform: translate(-50px, 100px) rotate(270deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
 }
 .stat-item h3 { font-size: 3rem; color: var(--primary); margin-bottom: 5px; }
 .stat-item p { color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }

@@ -3,12 +3,12 @@
 
 {% block content %}
 <style>
-    /* Layout Base (Desktop) */
+    /* Layout Base (Desktop) - Forçando o layout lateral */
     .detail-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 30px;
-        align-items: start;
+        display: grid !important;
+        grid-template-columns: 2fr 1fr !important; /* Sempre 2 colunas no desktop */
+        gap: 30px !important;
+        align-items: start !important;
     }
     .rules-content {
         color: var(--text-muted);
@@ -43,31 +43,19 @@
         color: #fff;
     }
 
-    /* Otimização Mobile Premium (Baseado no Feedback) */
+    /* Otimização Mobile Premium (Apenas para telas menores que 992px) */
     @media (max-width: 992px) {
-        .section-padding {
-            padding: 20px 12px !important; /* Margens laterais reduzidas para aproveitar espaço */
-        }
         .detail-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-        .glass-card {
-            padding: 2rem 1.5rem !important; /* Aumento do padding interno para mais respiro */
-            border-radius: 24px !important;
+            grid-template-columns: 1fr !important; /* Empilha no mobile */
+            gap: 20px !important;
         }
         .sticky-card {
-            position: static;
-            order: -1;
-            margin-bottom: 10px;
-        }
-        .detail-header {
-            margin-bottom: 25px !important;
-            padding: 0 5px;
+            position: static !important;
+            order: -1 !important; /* Card de ação no topo no mobile */
+            margin-bottom: 10px !important;
         }
         .detail-header h1 {
             font-size: 1.8rem !important;
-            line-height: 1.2;
         }
         
         /* Grid de informações em 2 colunas no mobile */
@@ -95,39 +83,12 @@
 
 <div class="section-padding" style="margin-top: 40px;">
     <div class="detail-header" style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;" data-aos="fade-right">
-        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; border-radius: 12px;">← Voltar</a>
+        <a href="{{ url_for('campeonatos') }}" class="btn btn-outline" style="padding: 0.6rem 1.2rem; font-size: 0.85rem; border-radius: 12px; width: auto;">← Voltar</a>
         <h1 style="margin: 0; font-weight: 800;">Detalhes do <span>Evento</span></h1>
     </div>
 
     <div class="detail-grid">
-        <!-- AÇÕES (Topo no Mobile) -->
-        <div class="sticky-card" data-aos="fade-left">
-            <div class="glass-card" style="text-align: center; border-color: var(--primary); box-shadow: 0 10px 30px rgba(0, 255, 163, 0.1);">
-                {% if inscrito %}
-                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Inscrição <span>Confirmada!</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Você já garantiu seu lugar na quadra.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: rgba(255,75,75,0.3); padding: 1rem;">Cancelar Inscrição</a>
-                {% elif espera %}
-                    <div style="color: #ffb800; font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Você está na <span>Espera</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Aguarde a promoção automática em caso de desistência.</p>
-                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: rgba(255,184,0,0.3); padding: 1rem;">Sair da Fila</a>
-                {% else %}
-                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">🏐</div>
-                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Vagas <span>Abertas</span></h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Garanta sua participação agora mesmo.</p>
-                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1.1rem;">Quero Participar</a>
-                {% endif %}
-                
-                {% if session.role == 'admin' %}
-                <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
-                <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem; color: #ff4b4b; border-color: transparent;" onclick="return confirm('Excluir este campeonato?')"><i class="fas fa-trash-alt"></i> Excluir Campeonato</a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- INFO DO CAMPEONATO -->
+        <!-- INFO DO CAMPEONATO (Lado Esquerdo no Desktop) -->
         <div data-aos="fade-up">
             <div class="glass-card" style="margin-bottom: 25px;">
                 <h2 style="color: var(--primary); margin-bottom: 2rem; font-size: 2.2rem; font-weight: 800; line-height: 1.1;">{{ camp.nome }}</h2>
@@ -188,6 +149,33 @@
                     </div>
                     {% endfor %}
                 </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AÇÕES (Lado Direito no Desktop, Topo no Mobile) -->
+        <div class="sticky-card" data-aos="fade-left">
+            <div class="glass-card" style="text-align: center; border-color: var(--primary); box-shadow: 0 10px 30px rgba(0, 255, 163, 0.1);">
+                {% if inscrito %}
+                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Inscrição <span>Confirmada!</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Você já garantiu seu lugar na quadra.</p>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ff4b4b; border-color: rgba(255,75,75,0.3); padding: 1rem;">Cancelar Inscrição</a>
+                {% elif espera %}
+                    <div style="color: #ffb800; font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Você está na <span>Espera</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Aguarde a promoção automática em caso de desistência.</p>
+                    <a href="{{ url_for('cancelar_inscricao', id=camp.id) }}" class="btn btn-outline" style="width: 100%; color: #ffb800; border-color: rgba(255,184,0,0.3); padding: 1rem;">Sair da Fila</a>
+                {% else %}
+                    <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">🏐</div>
+                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Vagas <span>Abertas</span></h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Garanta sua participação agora mesmo.</p>
+                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1.1rem;">Quero Participar</a>
+                {% endif %}
+                
+                {% if session.role == 'admin' %}
+                <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
+                <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem; color: #ff4b4b; border-color: transparent;" onclick="return confirm('Excluir este campeonato?')"><i class="fas fa-trash-alt"></i> Excluir Campeonato</a>
                 {% endif %}
             </div>
         </div>

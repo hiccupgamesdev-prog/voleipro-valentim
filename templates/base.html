@@ -99,13 +99,13 @@
 </head>
 <body class="dark-theme">
   <div id="splash-screen">
-    <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="pulse-logo">
+    <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="pulse-logo">
   </div>
 
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="{{ url_for('index') }}" class="navbar-brand">
-        <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="logo-round">
+        <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-round">
         <span>VôleiPro</span>
       </a>
       
@@ -148,7 +148,7 @@
 
   <footer class="footer">
     <div class="footer-content">
-      <img src="/static/img/logo_hiccup.png" alt="Hiccup Games" class="logo-large">
+      <img src="{{ url_for('static', filename='img/logo_hiccup.png') }}" alt="Hiccup Games" class="logo-large">
       <h2 style="font-size: 1.8rem; margin-bottom: 1rem; font-weight: 800;">🏐 VôleiPro – Valentim Gentil</h2>
       <p style="color: var(--text-muted); font-weight: 600; font-size: 1.1rem;">Desenvolvido por <strong>Jhony Brando</strong></p>
       <p style="margin-top: 8px; font-size: 1rem;">Uma criação <span class="hiccup-text">Hiccup Games</span> &copy; 2026</p>
@@ -163,6 +163,7 @@
   </footer>
 
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
   <style>
     /* Estilos adicionais para flash messages */
     .flash-container { position: fixed; top: 100px; right: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 10px; }

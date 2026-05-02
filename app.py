@@ -52,13 +52,40 @@ def save_user(user_data):
         except: pass
 
 def get_camps():
-    try: return list(db.campeonatos.find().sort("data_evento", 1)) if DB_CONNECTED else []
-    except: return []
+    if DB_CONNECTED:
+        try: return list(db.campeonatos.find().sort("data_evento", 1))
+        except: pass
+    
+    # Fallback para dados locais
+    try:
+        import json
+        with open(os.path.join(BASE_DIR, 'data', 'campeonatos.json'), 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return []
 
 def save_camp(camp_data):
     if DB_CONNECTED:
         try: db.campeonatos.update_one({"id": camp_data["id"]}, {"$set": camp_data}, upsert=True)
         except: pass
+    
+    # Fallback para salvar em arquivo local
+    try:
+        import json
+        filepath = os.path.join(BASE_DIR, 'data', 'campeonatos.json')
+        camps = []
+        if os.path.exists(filepath):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                camps = json.load(f)
+        
+        # Atualizar ou adicionar campeonato
+        camps = [c for c in camps if c.get("id") != camp_data.get("id")]
+        camps.append(camp_data)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(camps, f, indent=2, ensure_ascii=False)
+    except:
+        pass
 
 # --- PROTEÇÃO ---
 def login_required(f):
@@ -278,6 +305,8 @@ def admin_editar_camp(id):
     if request.method == "POST":
         try: new_max = int(request.form.get("max_participantes", 12))
         except: new_max = 12
+        
+        old_max = int(camp.get("max_participantes", 12))
             
         camp.update({
             "nome": request.form.get("nome", camp["nome"]),
@@ -292,9 +321,16 @@ def admin_editar_camp(id):
         if "inscritos" not in camp: camp["inscritos"] = []
         if "lista_espera" not in camp: camp["lista_espera"] = []
         
-        while len(camp["inscritos"]) < new_max and camp["lista_espera"]:
-            promovido = camp["lista_espera"].pop(0)
-            camp["inscritos"].append(promovido)
+        # Se aumentou as vagas, promover pessoas da fila de espera
+        if new_max > old_max:
+            while len(camp["inscritos"]) < new_max and camp["lista_espera"]:
+                promovido = camp["lista_espera"].pop(0)
+                camp["inscritos"].append(promovido)
+        # Se diminuiu as vagas, mover inscritos extras para fila de espera
+        elif new_max < old_max:
+            while len(camp["inscritos"]) > new_max:
+                removido = camp["inscritos"].pop()
+                camp["lista_espera"].insert(0, removido)
             
         save_camp(camp)
         flash("Campeonato atualizado!", "success")

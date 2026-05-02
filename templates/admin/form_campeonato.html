@@ -2,54 +2,100 @@
 {% block title %}{% if camp %}Editar{% else %}Novo{% endif %} Campeonato - Admin{% endblock %}
 
 {% block content %}
-<div class="auth-container" style="margin-top: 150px; max-width: 700px;" data-aos="zoom-in">
+<div class="auth-container" style="margin-top: 150px; max-width: 800px;" data-aos="zoom-in">
     <div style="text-align: center; margin-bottom: 2rem;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">{% if camp %}✏️{% else %}🏆{% endif %}</div>
         <h1>{% if camp %}Editar{% else %}Novo{% endif %} <span>Campeonato</span></h1>
         <p style="color: var(--text-muted);">{% if camp %}Atualize as informações do torneio.{% else %}Preencha os dados para abrir as inscrições.{% endif %}</p>
     </div>
 
-    <form method="POST" class="glass-card">
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label class="form-label">Nome do Campeonato</label>
-                <input type="text" name="nome" class="form-input" value="{{ camp.nome if camp else '' }}" placeholder="Ex: Torneio de Verão" required>
-            </div>
+    <form method="POST" class="glass-card" style="padding: 3rem;">
+        <!-- NOME DO CAMPEONATO -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label class="form-label">Nome do Campeonato</label>
+            <input type="text" name="nome" class="form-input" value="{{ camp.nome if camp else '' }}" placeholder="Ex: Torneio de Verão" required>
+        </div>
+
+        <!-- GRID 2 COLUNAS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- DATA -->
             <div class="form-group">
-                <label class="form-label">Data</label>
+                <label class="form-label">Data do Evento</label>
                 <input type="date" name="data" class="form-input" value="{{ camp.data_evento if camp else '' }}" required>
             </div>
+            <!-- HORÁRIO -->
             <div class="form-group">
                 <label class="form-label">Horário</label>
                 <input type="time" name="hora" class="form-input" value="{{ camp.hora_evento if camp else '' }}" required>
             </div>
+        </div>
+
+        <!-- GRID 2 COLUNAS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- LOCAL -->
             <div class="form-group">
                 <label class="form-label">Local</label>
                 <input type="text" name="local" class="form-input" value="{{ camp.local if camp else '' }}" placeholder="Ex: Ginásio Municipal" required>
             </div>
+            <!-- CATEGORIA -->
             <div class="form-group">
                 <label class="form-label">Categoria</label>
-                <select name="categoria" class="form-input">
+                <select name="categoria" class="form-input" style="cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2300ffa3%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3e%3cpolyline points=%226 9 12 15 18 9%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em; padding-right: 2.5rem;">
+                    <option value="Geral" {% if camp and camp.categoria == 'Geral' or not camp %}selected{% endif %}>Geral</option>
                     <option value="Masculino" {% if camp and camp.categoria == 'Masculino' %}selected{% endif %}>Masculino</option>
                     <option value="Feminino" {% if camp and camp.categoria == 'Feminino' %}selected{% endif %}>Feminino</option>
                     <option value="Misto" {% if camp and camp.categoria == 'Misto' %}selected{% endif %}>Misto</option>
-                    <option value="Geral" {% if camp and camp.categoria == 'Geral' or not camp %}selected{% endif %}>Geral</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label class="form-label">Máximo de Participantes</label>
-                <input type="number" name="max_participantes" class="form-input" value="{{ camp.max_participantes if camp else '12' }}" min="1" required>
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label class="form-label">Regras e Descrição</label>
-                <textarea name="regras" class="form-input" rows="5" placeholder="Escreva as regras do campeonato aqui...">{{ camp.regras if camp else '' }}</textarea>
-            </div>
         </div>
-        
-        <div style="display: flex; gap: 15px; margin-top: 20px;">
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline" style="flex: 1;">Cancelar</a>
-            <button type="submit" class="btn btn-primary" style="flex: 2;">{% if camp %}Salvar Alterações{% else %}Criar Campeonato{% endif %}</button>
+
+        <!-- MÁXIMO DE PARTICIPANTES -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label class="form-label">Máximo de Participantes</label>
+            <input type="number" name="max_participantes" class="form-input" value="{{ camp.max_participantes if camp else '12' }}" min="1" required>
+        </div>
+
+        <!-- REGRAS E DESCRIÇÃO -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label class="form-label">Regras e Descrição</label>
+            <textarea name="regras" class="form-input" rows="6" placeholder="Escreva as regras do campeonato aqui..." style="resize: vertical; min-height: 150px;">{{ camp.regras if camp else '' }}</textarea>
+        </div>
+
+        <!-- BOTÕES -->
+        <div style="display: flex; gap: 1.5rem; margin-top: 3rem;">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline" style="flex: 1; justify-content: center;">Cancelar</a>
+            <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center;">{% if camp %}Salvar Alterações{% else %}Criar Campeonato{% endif %}</button>
         </div>
     </form>
 </div>
+
+<style>
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: 0.3s;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 255, 163, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .form-input::placeholder {
+        color: #a0a0a0;
+    }
+    .form-input option {
+        background: #050505;
+        color: #ffffff;
+    }
+    textarea.form-input {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+</style>
 {% endblock %}

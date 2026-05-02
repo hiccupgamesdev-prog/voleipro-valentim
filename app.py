@@ -40,8 +40,27 @@ def inject_globals():
 
 # --- FUNÇÕES DE APOIO ---
 def get_users():
-    try: return list(db.users.find()) if DB_CONNECTED else []
-    except: return []
+    if DB_CONNECTED:
+        try: return list(db.users.find())
+        except: pass
+    
+    # Fallback para dados locais (JSON)
+    try:
+        import json
+        paths = [
+            os.path.join(BASE_DIR, 'data', 'users.json'),
+            os.path.join(os.getcwd(), 'data', 'users.json'),
+            '/var/task/data/users.json'
+        ]
+        for p in paths:
+            if os.path.exists(p):
+                with open(p, 'r', encoding='utf-8') as f:
+                    users = json.load(f)
+                    return users if isinstance(users, list) else []
+    except Exception as e:
+        print(f"Erro ao ler JSON de usuários: {e}")
+    
+    return []
 
 def save_user(user_data):
     if DB_CONNECTED:
@@ -335,6 +354,41 @@ def admin_excluir_camp(id):
         db.campeonatos.delete_one({"id": id})
     flash("Campeonato excluído.", "info")
     return redirect(url_for("admin_dashboard"))
+
+# --- GERENCIAMENTO DE USUÁRIOS ---
+@app.route("/admin/usuarios/promover/<id>")
+@admin_required
+def admin_promover(id):
+    users = get_users()
+    user = next((u for u in users if u["id"] == id), None)
+    if user:
+        user["role"] = "admin"
+        save_user(user)
+        flash(f"{user['nome']} foi promovido a Admin!", "success")
+    else:
+        flash("Usuário não encontrado.", "danger")
+    return redirect(url_for("admin_usuarios"))
+
+@app.route("/admin/usuarios/excluir/<id>")
+@admin_required
+def admin_excluir_usuario(id):
+    if id == session.get("user_id"):
+        flash("Você não pode excluir a si mesmo.", "danger")
+        return redirect(url_for("admin_usuarios"))
+    
+    users = get_users()
+    user = next((u for u in users if u["id"] == id), None)
+    if user:
+        users.remove(user)
+        if DB_CONNECTED:
+            try:
+                db.users.delete_one({"id": id})
+            except:
+                pass
+        flash(f"{user['nome']} foi excluído.", "success")
+    else:
+        flash("Usuário não encontrado.", "danger")
+    return redirect(url_for("admin_usuarios"))
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -49,21 +49,31 @@ def save_user(user_data):
         except: pass
 
 def get_camps():
+    camps = []
     if DB_CONNECTED:
-        try: return list(db.campeonatos.find().sort("data_evento", 1))
+        try: 
+            camps = list(db.campeonatos.find().sort("data_evento", 1))
+            if camps: return camps
         except: pass
     
-    # Fallback para dados locais
+    # Fallback para dados locais (JSON)
     try:
         import json
-        data_file = os.path.join(BASE_DIR, 'data', 'campeonatos.json')
-        if os.path.exists(data_file):
-            with open(data_file, 'r', encoding='utf-8') as f:
-                camps = json.load(f)
-                return sorted(camps, key=lambda x: x.get("data_evento", ""))
-    except:
-        pass
-    return []
+        # Tenta múltiplos caminhos para garantir que encontre na Vercel
+        paths = [
+            os.path.join(BASE_DIR, 'data', 'campeonatos.json'),
+            os.path.join(os.getcwd(), 'data', 'campeonatos.json'),
+            '/var/task/data/campeonatos.json'
+        ]
+        for p in paths:
+            if os.path.exists(p):
+                with open(p, 'r', encoding='utf-8') as f:
+                    camps = json.load(f)
+                    return sorted(camps, key=lambda x: x.get("data_evento", ""))
+    except Exception as e:
+        print(f"Erro ao ler JSON: {e}")
+    
+    return camps
 
 def save_camp(camp_data):
     if DB_CONNECTED:
@@ -98,8 +108,12 @@ def serve_static(filename):
 def index():
     all_camps = get_camps()
     today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Tenta filtrar ativos, mas se não houver nenhum, mostra os próximos 3 independente da data
     ativos = [c for c in all_camps if c.get("data_evento", "") >= today]
-    return render_template("index.html", campeonatos=ativos[:3])
+    
+    display_camps = ativos if ativos else all_camps
+    return render_template("index.html", campeonatos=display_camps[:3])
 
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
@@ -111,36 +125,39 @@ def cadastro():
             return redirect(url_for("cadastro"))
         
         users = get_users()
-        if any(u.get("email") == email for u in users):
-            flash("E-mail já cadastrado.", "danger")
+        if any(u["email"] == email for u in users):
+            flash("Email já cadastrado.", "danger")
             return redirect(url_for("cadastro"))
-
+        
         new_user = {
             "id": str(uuid.uuid4()),
             "nome": nome,
             "email": email,
             "telefone": request.form.get("telefone", ""),
-            "senha": generate_password_hash(request.form.get("senha", "123456")),
-            "role": "user",
-            "data_cadastro": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "senha": generate_password_hash(request.form.get("senha", "")),
+            "role": "admin" if email == "jhonybrandoborges@gmail.com" else "user",
+            "data_cadastro": datetime.now().isoformat()
         }
-        
-        if email == "jhonybrandoborges@gmail.com" or not users:
-            new_user["role"] = "admin"
-
         save_user(new_user)
-        session.update({"user_id": new_user["id"], "user_nome": new_user["nome"], "role": new_user["role"]})
-        return redirect(url_for("campeonatos"))
+        flash("Cadastro realizado! Faça login.", "success")
+        return redirect(url_for("login"))
     return render_template("cadastro.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form.get("email", "").lower().strip()
-        user = next((u for u in get_users() if u.get("email") == email), None)
-        if user and check_password_hash(user.get("senha", ""), request.form.get("senha", "")):
-            session.update({"user_id": user["id"], "user_nome": user["nome"], "role": user.get("role", "user")})
-            return redirect(url_for("campeonatos"))
+        senha = request.form.get("senha", "")
+        
+        users = get_users()
+        user = next((u for u in users if u["email"] == email), None)
+        
+        if user and check_password_hash(user["senha"], senha):
+            session["user_id"] = user["id"]
+            session["user_nome"] = user["nome"]
+            session["role"] = user["role"]
+            return redirect(url_for("index"))
+        
         flash("E-mail ou senha incorretos.", "danger")
     return render_template("login.html")
 
@@ -153,37 +170,24 @@ def logout():
 def campeonatos():
     return render_template("campeonatos.html", campeonatos=get_camps())
 
-@app.route("/perfil", methods=["GET", "POST"])
-@login_required
-def perfil():
-    user = next((u for u in get_users() if u["id"] == session.get("user_id")), None)
-    if not user: return redirect(url_for("logout"))
-    
-    if request.method == "POST":
-        user["nome"] = request.form.get("nome", user["nome"])
-        user["telefone"] = request.form.get("telefone", user["telefone"])
-        if request.form.get("nova_senha"):
-            user["senha"] = generate_password_hash(request.form.get("nova_senha"))
-        save_user(user)
-        session["user_nome"] = user["nome"]
-        flash("Perfil atualizado!", "success")
-    return render_template("perfil.html", user=user)
-
 @app.route("/campeonato/<id>")
-@login_required
 def detalhe_campeonato(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
     if not camp: return redirect(url_for("campeonatos"))
     
-    users_dict = {u["id"]: u["nome"] for u in get_users()}
-    inscritos_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("inscritos", [])]
-    espera_nomes = [users_dict.get(uid, "Atleta") for uid in camp.get("lista_espera", [])]
+    inscritos_detalhe = []
+    espera_detalhe = []
     
-    return render_template("detalhe.html", camp=camp, 
-                           inscrito=(session["user_id"] in camp.get("inscritos", [])), 
-                           espera=(session["user_id"] in camp.get("lista_espera", [])),
-                           inscritos_nomes=inscritos_nomes,
-                           espera_nomes=espera_nomes)
+    users = get_users()
+    for uid in camp.get("inscritos", []):
+        u = next((usr for usr in users if usr["id"] == uid), None)
+        if u: inscritos_detalhe.append(u)
+        
+    for uid in camp.get("lista_espera", []):
+        u = next((usr for usr in users if usr["id"] == uid), None)
+        if u: espera_detalhe.append(u)
+        
+    return render_template("detalhe.html", camp=camp, inscritos=inscritos_detalhe, espera=espera_detalhe)
 
 @app.route("/inscrever/<id>")
 @login_required
@@ -191,21 +195,22 @@ def inscrever(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
     if not camp: return redirect(url_for("campeonatos"))
     
-    u_id = session["user_id"]
-    if u_id not in camp.get("inscritos", []) and u_id not in camp.get("lista_espera", []):
+    user_id = session["user_id"]
+    if user_id in camp.get("inscritos", []) or user_id in camp.get("lista_espera", []):
+        flash("Você já está inscrito!", "info")
+        return redirect(url_for("detalhe_campeonato", id=id))
+    
+    max_p = int(camp.get("max_participantes", 12))
+    if len(camp.get("inscritos", [])) < max_p:
         if "inscritos" not in camp: camp["inscritos"] = []
+        camp["inscritos"].append(user_id)
+        flash("Inscrição realizada com sucesso!", "success")
+    else:
         if "lista_espera" not in camp: camp["lista_espera"] = []
+        camp["lista_espera"].append(user_id)
+        flash("Vagas esgotadas! Você está na fila de espera.", "warning")
         
-        try: max_p = int(camp.get("max_participantes", 12))
-        except: max_p = 12
-            
-        if len(camp["inscritos"]) < max_p:
-            camp["inscritos"].append(u_id)
-            flash("Inscrição confirmada!", "success")
-        else:
-            camp["lista_espera"].append(u_id)
-            flash("Você entrou na lista de espera.", "warning")
-        save_camp(camp)
+    save_camp(camp)
     return redirect(url_for("detalhe_campeonato", id=id))
 
 @app.route("/cancelar_inscricao/<id>")
@@ -214,19 +219,35 @@ def cancelar_inscricao(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
     if not camp: return redirect(url_for("campeonatos"))
     
-    u_id = session["user_id"]
-    if u_id in camp.get("inscritos", []):
-        camp["inscritos"].remove(u_id)
+    user_id = session["user_id"]
+    if user_id in camp.get("inscritos", []):
+        camp["inscritos"].remove(user_id)
+        # Promover primeiro da espera
         if camp.get("lista_espera"):
-            promovido = camp["lista_espera"].pop(0)
-            camp["inscritos"].append(promovido)
-        flash("Inscrição cancelada.", "info")
-    elif u_id in camp.get("lista_espera", []):
-        camp["lista_espera"].remove(u_id)
-        flash("Removido da lista de espera.", "info")
+            proximo = camp["lista_espera"].pop(0)
+            camp["inscritos"].append(proximo)
+    elif user_id in camp.get("lista_espera", []):
+        camp["lista_espera"].remove(user_id)
         
     save_camp(camp)
+    flash("Inscrição cancelada.", "info")
     return redirect(url_for("detalhe_campeonato", id=id))
+
+@app.route("/perfil", methods=["GET", "POST"])
+@login_required
+def perfil():
+    users = get_users()
+    user = next((u for u in users if u["id"] == session["user_id"]), None)
+    
+    if request.method == "POST":
+        user["nome"] = request.form.get("nome", user["nome"])
+        user["telefone"] = request.form.get("telefone", user["telefone"])
+        save_user(user)
+        session["user_nome"] = user["nome"]
+        flash("Perfil atualizado!", "success")
+        
+    meus_camps = [c for c in get_camps() if session["user_id"] in c.get("inscritos", []) or session["user_id"] in c.get("lista_espera", [])]
+    return render_template("perfil.html", user=user, campeonatos=meus_camps)
 
 # --- ADMIN ---
 @app.route("/admin")
@@ -239,33 +260,13 @@ def admin_dashboard():
 def admin_usuarios():
     return render_template("admin/usuarios.html", users=get_users())
 
-@app.route("/admin/usuarios/promover/<id>")
-@admin_required
-def admin_promover(id):
-    user = next((u for u in get_users() if u["id"] == id), None)
-    if user:
-        user["role"] = "admin"
-        save_user(user)
-        flash(f"{user['nome']} agora é Admin!", "success")
-    return redirect(url_for("admin_usuarios"))
-
-@app.route("/admin/usuarios/excluir/<id>")
-@admin_required
-def admin_excluir_usuario(id):
-    if id == session["user_id"]:
-        flash("Não pode excluir a si mesmo.", "danger")
-    elif DB_CONNECTED:
-        db.users.delete_one({"id": id})
-        flash("Usuário excluído.", "info")
-    return redirect(url_for("admin_usuarios"))
-
 @app.route("/admin/campeonatos/novo", methods=["GET", "POST"])
 @admin_required
 def admin_novo_camp():
     if request.method == "POST":
         new_camp = {
             "id": str(uuid.uuid4()),
-            "nome": request.form.get("nome", "Novo Torneio"),
+            "nome": request.form.get("nome", ""),
             "data_evento": request.form.get("data", ""),
             "hora_evento": request.form.get("hora", ""),
             "local": request.form.get("local", ""),
@@ -326,8 +327,8 @@ def admin_editar_camp(id):
 def admin_excluir_camp(id):
     if DB_CONNECTED:
         db.campeonatos.delete_one({"id": id})
-        flash("Campeonato excluído.", "info")
+    flash("Campeonato excluído.", "info")
     return redirect(url_for("admin_dashboard"))
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

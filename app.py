@@ -175,19 +175,25 @@ def detalhe_campeonato(id):
     camp = next((c for c in get_camps() if c["id"] == id), None)
     if not camp: return redirect(url_for("campeonatos"))
     
-    inscritos_detalhe = []
-    espera_detalhe = []
+    inscritos_nomes = []
+    espera_nomes = []
     
     users = get_users()
     for uid in camp.get("inscritos", []):
         u = next((usr for usr in users if usr["id"] == uid), None)
-        if u: inscritos_detalhe.append(u)
+        if u: inscritos_nomes.append(u.get("nome", "Atleta Desconhecido"))
         
     for uid in camp.get("lista_espera", []):
         u = next((usr for usr in users if usr["id"] == uid), None)
-        if u: espera_detalhe.append(u)
+        if u: espera_nomes.append(u.get("nome", "Atleta Desconhecido"))
+    
+    inscrito = False
+    espera = False
+    if session.get("user_id"):
+        inscrito = session["user_id"] in camp.get("inscritos", [])
+        espera = session["user_id"] in camp.get("lista_espera", [])
         
-    return render_template("detalhe.html", camp=camp, inscritos=inscritos_detalhe, espera=espera_detalhe)
+    return render_template("detalhe.html", camp=camp, inscritos_nomes=inscritos_nomes, espera_nomes=espera_nomes, inscrito=inscrito, espera=espera)
 
 @app.route("/inscrever/<id>")
 @login_required

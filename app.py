@@ -213,10 +213,14 @@ def detalhe_campeonato(id):
     camp["lista_espera"] = [uid for uid in camp.get("lista_espera", []) if uid in user_ids_existentes]
     
     # Se abriu vaga devido à limpeza, promove da espera
+    # MAS: Não promove automaticamente se o campeonato é PAGO (precisa de confirmação manual do admin)
     max_p = int(camp.get("max_participantes", 12))
-    while len(camp["inscritos"]) < max_p and camp["lista_espera"]:
-        proximo = camp["lista_espera"].pop(0)
-        camp["inscritos"].append(proximo)
+    tipo = camp.get("tipo", "gratuito")
+    
+    if tipo != "pago":  # Só promove automaticamente em campeonatos GRATUITOS
+        while len(camp["inscritos"]) < max_p and camp["lista_espera"]:
+            proximo = camp["lista_espera"].pop(0)
+            camp["inscritos"].append(proximo)
     
     save_camp(camp) # Salva a limpeza realizada
 
@@ -250,17 +254,22 @@ def inscrever(id):
     tipo = camp.get("tipo", "gratuito")
     status_fila = camp.get("status_fila", "aberta")
     
+    # Verifica se a fila está fechada
+    if status_fila == "fechada":
+        flash("A fila de inscrição foi encerrada.", "danger")
+        return redirect(url_for("detalhe_campeonato", id=id))
+    
     if tipo == "pago":
-        # No pago, todos vão para a espera até o admin confirmar pagamento
+        # Em campeonatos PAGOS: todos vão para lista_espera (aguardando confirmação de pagamento)
+        # Não importa se há vagas disponíveis - o admin precisa confirmar o pagamento primeiro
         if "lista_espera" not in camp: camp["lista_espera"] = []
-        # Evita duplicidade se já estiver na espera
         if user_id not in camp["lista_espera"]:
             camp["lista_espera"].append(user_id)
             flash("Inscrição realizada! Aguarde a confirmação do pagamento pelo administrador.", "warning")
         else:
             flash("Você já está na lista de espera aguardando confirmação.", "info")
     else:
-        # Lógica normal para gratuito
+        # Em campeonatos GRATUITOS: lógica normal (fila automática)
         max_p = int(camp.get("max_participantes", 12))
         if len(camp.get("inscritos", [])) < max_p:
             if "inscritos" not in camp: camp["inscritos"] = []
@@ -278,15 +287,27 @@ def inscrever(id):
 @admin_required
 def admin_confirmar_pagamento(camp_id, user_id):
     camp = next((c for c in get_camps() if c["id"] == camp_id), None)
-    if not camp: return redirect(url_for("admin_dashboard"))
+    if not camp: 
+        flash("Campeonato nao encontrado.", "danger")
+        return redirect(url_for("admin_dashboard"))
     
-    if user_id in camp.get("lista_espera", []):
-        camp["lista_espera"].remove(user_id)
-        if "inscritos" not in camp: camp["inscritos"] = []
-        camp["inscritos"].append(user_id)
-        save_camp(camp)
-        flash("Pagamento confirmado e atleta movido para competidores!", "success")
+    # Verifica se o atleta esta na lista de espera (aguardando confirmacao)
+    if user_id not in camp.get("lista_espera", []):
+        flash("Atleta nao encontrado na lista de pagamentos pendentes.", "warning")
+        return redirect(url_for("detalhe_campeonato", id=camp_id))
     
+    # Move o atleta de lista_espera para inscritos (confirmado)
+    camp["lista_espera"].remove(user_id)
+    if "inscritos" not in camp: camp["inscritos"] = []
+    camp["inscritos"].append(user_id)
+    save_camp(camp)
+    
+    # Busca o nome do atleta para feedback
+    users = get_users()
+    user = next((u for u in users if u["id"] == user_id), None)
+    user_name = user.get("nome", "Atleta") if user else "Atleta"
+    
+    flash(f"Pagamento de {user_name} confirmado! Atleta movido para lista de competidores.", "success")
     return redirect(url_for("detalhe_campeonato", id=camp_id))
 
 @app.route("/admin/campeonato/alternar_fila/<id>")

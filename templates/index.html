@@ -100,7 +100,11 @@
                 <h3 style="font-size: 1.6rem; margin-bottom: 15px; font-weight: 700;">{{ camp.nome }}</h3>
                 <div style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">
                     <p style="margin-bottom: 8px;"><i class="fas fa-map-marker-alt" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.local }}</p>
+                    {% if camp.tipo != 'pago' %}
                     <p><i class="fas fa-users" style="margin-right: 10px; color: var(--primary);"></i> {{ camp.inscritos|length }} / {{ camp.max_participantes }} Inscritos</p>
+                    {% else %}
+                    <p><i class="fas fa-check-circle" style="margin-right: 10px; color: var(--primary);"></i> Inscrições Abertas</p>
+                    {% endif %}
                 </div>
                 <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem; text-transform: uppercase; font-weight: 800;">Ver Detalhes</a>
             </div>

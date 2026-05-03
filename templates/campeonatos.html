@@ -25,18 +25,27 @@
                         <p style="font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); font-weight: 700; text-transform: uppercase;">Hora</p>
                         <p style="color: #fff; font-weight: 600;">{{ camp.hora_evento }}</p>
                     </div>
+                    {% if camp.tipo != 'pago' %}
                     <div>
                         <p style="font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); font-weight: 700; text-transform: uppercase;">Vagas</p>
                         <p style="color: #fff; font-weight: 600;">{{ camp.inscritos | length if camp.inscritos else 0 }} / {{ camp.max_participantes }}</p>
                     </div>
+                    {% else %}
+                    <div>
+                        <p style="font-size: 0.85rem; margin-bottom: 4px; color: var(--primary); font-weight: 700; text-transform: uppercase;">Status</p>
+                        <p style="color: #fff; font-weight: 600;">Inscrições Abertas</p>
+                    </div>
+                    {% endif %}
                 </div>
 
+                {% if camp.tipo != 'pago' %}
                 <div class="progress-container" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; margin-bottom: 2rem; overflow: hidden;">
                     {% set n_inscritos = camp.inscritos | length if camp.inscritos else 0 %}
                     {% set n_max = camp.max_participantes | int if camp.max_participantes else 12 %}
                     {% set percent = (n_inscritos / n_max * 100) if n_max > 0 else 0 %}
                     <div class="progress-bar" style="width: {{ percent }}%; height: 100%; background: var(--gradient); box-shadow: 0 0 10px var(--primary-glow);"></div>
                 </div>
+                {% endif %}
 
                 <a href="{{ url_for('detalhe_campeonato', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 0.9rem 2rem;">Ver Detalhes</a>
             </div>

@@ -253,8 +253,12 @@ def inscrever(id):
     if tipo == "pago":
         # No pago, todos vão para a espera até o admin confirmar pagamento
         if "lista_espera" not in camp: camp["lista_espera"] = []
-        camp["lista_espera"].append(user_id)
-        flash("Inscrição realizada! Aguarde a confirmação do pagamento pelo administrador.", "warning")
+        # Evita duplicidade se já estiver na espera
+        if user_id not in camp["lista_espera"]:
+            camp["lista_espera"].append(user_id)
+            flash("Inscrição realizada! Aguarde a confirmação do pagamento pelo administrador.", "warning")
+        else:
+            flash("Você já está na lista de espera aguardando confirmação.", "info")
     else:
         # Lógica normal para gratuito
         max_p = int(camp.get("max_participantes", 12))

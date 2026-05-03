@@ -110,6 +110,16 @@
                         <span class="info-label">👥 Inscritos</span>
                         <div class="info-value">{{ camp.inscritos|length }} / {{ camp.max_participantes }}</div>
                     </div>
+                    {% if session.role == 'admin' %}
+                    <div class="info-block">
+                        <span class="info-label">💰 Tipo</span>
+                        <div class="info-value">{{ 'Pago' if camp.tipo == 'pago' else 'Gratuito' }}</div>
+                    </div>
+                    <div class="info-block">
+                        <span class="info-label">🚪 Fila</span>
+                        <div class="info-value">{{ 'Aberta' if camp.status_fila != 'fechada' else 'Fechada' }}</div>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="rules-section">
@@ -139,13 +149,22 @@
                 {% endif %}
 
                 {% if espera_nomes %}
-                <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.3rem;">Lista de <span>Espera</span></h3>
+                <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.3rem;">Lista de <span>Espera / Pagamento</span></h3>
                 <div style="display: grid; gap: 10px;">
                     {% for nome in espera_nomes %}
                     <div style="padding: 12px 15px; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; gap: 12px; opacity: 0.8;">
                         <div style="width: 8px; height: 8px; background: #ffb800; border-radius: 50%;"></div>
                         <span style="font-size: 0.95rem;">{{ nome }}</span>
+                        
+                        {% if session.role == 'admin' and camp.tipo == 'pago' %}
+                        <a href="{{ url_for('admin_confirmar_pagamento', camp_id=camp.id, user_id=camp.lista_espera[loop.index0]) }}" 
+                           class="btn btn-primary" 
+                           style="margin-left: auto; padding: 5px 10px; font-size: 0.7rem; border-radius: 8px;">
+                           Confirmar Pagamento
+                        </a>
+                        {% else %}
                         <small style="margin-left: auto; color: var(--text-muted);">{{ loop.index }}º fila</small>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -170,11 +189,21 @@
                     <div style="color: var(--primary); font-size: 3rem; margin-bottom: 1rem;">🏐</div>
                     <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Vagas <span>Abertas</span></h3>
                     <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Garanta sua participação agora mesmo.</p>
-                    <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1.1rem;">Quero Participar</a>
+                    {% if camp.status_fila == 'fechada' %}
+                        <div style="color: #ff4b4b; font-size: 3rem; margin-bottom: 1rem;">🚫</div>
+                        <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">Fila <span>Encerrada</span></h3>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Não é mais possível se inscrever neste evento.</p>
+                    {% else %}
+                        <a href="{{ url_for('inscrever', id=camp.id) }}" class="btn btn-primary" style="width: 100%; padding: 1.1rem;">Quero Participar</a>
+                    {% endif %}
                 {% endif %}
                 
                 {% if session.role == 'admin' %}
                 <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0;">
+                <a href="{{ url_for('admin_alternar_fila', id=camp.id) }}" class="btn btn-outline" style="width: 100%; margin-bottom: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-door-{{ 'closed' if camp.status_fila != 'fechada' else 'open' }}"></i> 
+                    {{ 'Fechar Fila' if camp.status_fila != 'fechada' else 'Abrir Fila' }}
+                </a>
                 <a href="{{ url_for('admin_excluir_camp', id=camp.id) }}" class="btn btn-outline" style="width: 100%; font-size: 0.8rem; color: #ff4b4b; border-color: transparent;" onclick="return confirm('Excluir este campeonato?')"><i class="fas fa-trash-alt"></i> Excluir Campeonato</a>
                 {% endif %}
             </div>

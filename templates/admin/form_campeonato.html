@@ -40,6 +40,13 @@
                 <label class="form-label">Máximo de Participantes</label>
                 <input type="number" name="max_participantes" class="form-input" value="{{ camp.max_participantes if camp else '12' }}" min="1" required>
             </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de Campeonato</label>
+                <select name="tipo" class="form-input">
+                    <option value="gratuito" {% if camp and camp.tipo == 'gratuito' or not camp %}selected{% endif %}>Gratuito (Fila Automática)</option>
+                    <option value="pago" {% if camp and camp.tipo == 'pago' %}selected{% endif %}>Pago (Confirmação Manual)</option>
+                </select>
+            </div>
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label class="form-label">Regras e Descrição</label>
                 <textarea name="regras" class="form-input" rows="5" placeholder="Escreva as regras do campeonato aqui...">{{ camp.regras if camp else '' }}</textarea>

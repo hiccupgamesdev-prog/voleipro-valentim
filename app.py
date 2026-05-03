@@ -247,17 +247,56 @@ def inscrever(id):
         flash("Você já está inscrito!", "info")
         return redirect(url_for("detalhe_campeonato", id=id))
     
-    max_p = int(camp.get("max_participantes", 12))
-    if len(camp.get("inscritos", [])) < max_p:
-        if "inscritos" not in camp: camp["inscritos"] = []
-        camp["inscritos"].append(user_id)
-        flash("Inscrição realizada com sucesso!", "success")
-    else:
+    tipo = camp.get("tipo", "gratuito")
+    status_fila = camp.get("status_fila", "aberta")
+    
+    if tipo == "pago":
+        # No pago, todos vão para a espera até o admin confirmar pagamento
         if "lista_espera" not in camp: camp["lista_espera"] = []
         camp["lista_espera"].append(user_id)
-        flash("Vagas esgotadas! Você está na fila de espera.", "warning")
+        flash("Inscrição realizada! Aguarde a confirmação do pagamento pelo administrador.", "warning")
+    else:
+        # Lógica normal para gratuito
+        max_p = int(camp.get("max_participantes", 12))
+        if len(camp.get("inscritos", [])) < max_p:
+            if "inscritos" not in camp: camp["inscritos"] = []
+            camp["inscritos"].append(user_id)
+            flash("Inscrição realizada com sucesso!", "success")
+        else:
+            if "lista_espera" not in camp: camp["lista_espera"] = []
+            camp["lista_espera"].append(user_id)
+            flash("Vagas esgotadas! Você está na fila de espera.", "warning")
         
     save_camp(camp)
+    return redirect(url_for("detalhe_campeonato", id=id))
+
+@app.route("/admin/campeonato/confirmar_pagamento/<camp_id>/<user_id>")
+@admin_required
+def admin_confirmar_pagamento(camp_id, user_id):
+    camp = next((c for c in get_camps() if c["id"] == camp_id), None)
+    if not camp: return redirect(url_for("admin_dashboard"))
+    
+    if user_id in camp.get("lista_espera", []):
+        camp["lista_espera"].remove(user_id)
+        if "inscritos" not in camp: camp["inscritos"] = []
+        camp["inscritos"].append(user_id)
+        save_camp(camp)
+        flash("Pagamento confirmado e atleta movido para competidores!", "success")
+    
+    return redirect(url_for("detalhe_campeonato", id=camp_id))
+
+@app.route("/admin/campeonato/alternar_fila/<id>")
+@admin_required
+def admin_alternar_fila(id):
+    camp = next((c for c in get_camps() if c["id"] == id), None)
+    if not camp: return redirect(url_for("admin_dashboard"))
+    
+    atual = camp.get("status_fila", "aberta")
+    camp["status_fila"] = "fechada" if atual == "aberta" else "aberta"
+    save_camp(camp)
+    
+    status_msg = "fechada" if camp["status_fila"] == "fechada" else "aberta"
+    flash(f"A fila do campeonato foi {status_msg}!", "info")
     return redirect(url_for("detalhe_campeonato", id=id))
 
 @app.route("/cancelar_inscricao/<id>")
@@ -321,6 +360,8 @@ def admin_novo_camp():
             "categoria": request.form.get("categoria", "Geral"),
             "max_participantes": request.form.get("max_participantes", "12"),
             "regras": request.form.get("regras", ""),
+            "tipo": request.form.get("tipo", "gratuito"), # 'gratuito' ou 'pago'
+            "status_fila": "aberta", # 'aberta' ou 'fechada'
             "inscritos": [], "lista_espera": []
         }
         save_camp(new_camp)
@@ -348,7 +389,8 @@ def admin_editar_camp(id):
             "local": request.form.get("local", camp["local"]),
             "categoria": request.form.get("categoria", camp["categoria"]),
             "max_participantes": str(new_max),
-            "regras": request.form.get("regras", camp["regras"])
+            "regras": request.form.get("regras", camp["regras"]),
+            "tipo": request.form.get("tipo", camp.get("tipo", "gratuito"))
         })
         
         if "inscritos" not in camp: camp["inscritos"] = []

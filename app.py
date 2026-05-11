@@ -310,6 +310,33 @@ def admin_confirmar_pagamento(camp_id, user_id):
     flash(f"Pagamento de {user_name} confirmado! Atleta movido para lista de competidores.", "success")
     return redirect(url_for("detalhe_campeonato", id=camp_id))
 
+@app.route("/admin/campeonato/reverter_pagamento/<camp_id>/<user_id>")
+@admin_required
+def admin_reverter_pagamento(camp_id, user_id):
+    camp = next((c for c in get_camps() if c["id"] == camp_id), None)
+    if not camp: 
+        flash("Campeonato nao encontrado.", "danger")
+        return redirect(url_for("admin_dashboard"))
+    
+    # Verifica se o atleta esta na lista de inscritos
+    if user_id not in camp.get("inscritos", []):
+        flash("Atleta nao encontrado na lista de confirmados.", "warning")
+        return redirect(url_for("detalhe_campeonato", id=camp_id))
+    
+    # Move o atleta de inscritos para lista_espera (aguardando confirmacao)
+    camp["inscritos"].remove(user_id)
+    if "lista_espera" not in camp: camp["lista_espera"] = []
+    camp["lista_espera"].append(user_id)
+    save_camp(camp)
+    
+    # Busca o nome do atleta para feedback
+    users = get_users()
+    user = next((u for u in users if u["id"] == user_id), None)
+    user_name = user.get("nome", "Atleta") if user else "Atleta"
+    
+    flash(f"Confirmação de {user_name} revertida! Atleta movido de volta para lista de espera.", "info")
+    return redirect(url_for("detalhe_campeonato", id=camp_id))
+
 @app.route("/admin/campeonato/alternar_fila/<id>")
 @admin_required
 def admin_alternar_fila(id):

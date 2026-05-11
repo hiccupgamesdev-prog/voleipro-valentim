@@ -139,7 +139,7 @@
             <div class="glass-card">
                 {% if session.role == 'admin' and camp.tipo == 'pago' and espera_nomes %}
                 <div style="background: rgba(0, 255, 163, 0.05); border: 1px solid var(--primary); border-radius: 15px; padding: 20px; margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">💳 Gestão de Pagamentos <span style="color: #fff;">Pendentes</span></h3>
+                    <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">💳 Lista de Aguardando Confirmação : <span style="color: #fff;">{{ espera_nomes|length }} atletas</span></h3>
                     <div style="display: grid; gap: 10px;">
                         {% for nome in espera_nomes %}
                         <div style="padding: 12px 15px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.1);">
@@ -156,13 +156,21 @@
                 </div>
                 {% endif %}
 
-                <h3 style="margin-bottom: 1.5rem; font-size: 1.3rem;">Atletas <span>Confirmados</span></h3>
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.3rem;">Atletas <span>Confirmados</span> : {{ inscritos_nomes|length }} atletas</h3>
                 {% if inscritos_nomes %}
                 <div style="display: grid; gap: 10px;">
                     {% for nome in inscritos_nomes %}
                     <div style="padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05);">
                         <div style="width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary-glow);"></div>
                         <span style="font-weight: 500;">{{ nome }}</span>
+                        {% if session.role == 'admin' %}
+                        <a href="{{ url_for('admin_reverter_pagamento', camp_id=camp.id, user_id=camp.inscritos[loop.index0]) }}" 
+                           class="btn btn-outline" 
+                           style="margin-left: auto; padding: 5px 10px; font-size: 0.7rem; border-radius: 6px; color: #ffb800; border-color: rgba(255,184,0,0.3);"
+                           onclick="return confirm('Reverter confirmação de {{ nome }}?')">
+                           Reverter
+                        </a>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -171,7 +179,7 @@
                 {% endif %}
 
                 {% if espera_nomes and (camp.tipo != 'pago' or session.role != 'admin') %}
-                <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.3rem;">Lista de <span>{{ 'Aguardando Confirmação' if camp.tipo == 'pago' else 'Espera' }}</span></h3>
+                <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.3rem;">Lista de <span>{{ 'Aguardando Confirmação' if camp.tipo == 'pago' else 'Espera' }}</span> : {{ espera_nomes|length }} atletas</h3>
                 <div style="display: grid; gap: 10px;">
                     {% for nome in espera_nomes %}
                     <div style="padding: 12px 15px; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; gap: 12px; opacity: 0.8;">
